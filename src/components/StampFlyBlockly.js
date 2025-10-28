@@ -28,6 +28,16 @@ const defineStampFlyBlocks = () => {
     }
   };
 
+  Blockly.Blocks['flip'] = {
+    init: function() {
+      this.appendDummyInput().appendField("反転 ✈️");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("ドローンが前方に宙返りします。");
+    }
+  };
+
   Blockly.Blocks['fly_up'] = {
     init: function() {
       this.appendDummyInput()
@@ -51,6 +61,12 @@ const defineStampFlyBlocks = () => {
     return 'land();\n';
   };
 
+  // C++ジェネレーター: flip ブロック
+  Cpp['flip'] = function(block) {
+    // ドローンを前方に宙返りさせる呼び出しを生成します
+    return 'flip();\n';
+  };
+
   Cpp['fly_up'] = function(block) {
     const distance = block.getFieldValue('DISTANCE');
     return `fly_up(${distance});\n`;
@@ -65,7 +81,8 @@ const toolboxXml = `
         <block type="land"></block>
     </category>
     <category name="移動と制御" colour="20">
-        <block type="fly_up"></block>
+    <block type="flip"></block>
+    <block type="fly_up"></block>
         <block type="controls_repeat_ext">
             <value name="TIMES">
                 <block type="math_number"><field name="NUM">3</field></block>
