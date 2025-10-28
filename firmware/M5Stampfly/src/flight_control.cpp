@@ -213,7 +213,7 @@ uint8_t ahrs_reset_flag      = 0;
 uint8_t last_ahrs_reset_flag = 0;
 
 bool forward_mode_flag = false;
-uint8_t forward_mode_counter = 0;
+uint32_t forward_mode_counter = 0;
 
 // Function declaration
 void init_pwm();
@@ -680,12 +680,13 @@ void get_command(void) {
         if (Roll_angle_command > 1.0f) Roll_angle_command = 1.0f;
         if (forward_mode_flag)
         {
-            Pitch_angle_command = -0.3;
+            Pitch_angle_command = -0.15;
             forward_mode_counter++;
-            if (forward_mode_counter > 300)
+            if (forward_mode_counter > 800)
             {
                 forward_mode_flag = false;
                 forward_mode_counter = 0;
+                Mode = FLIP_MODE;
             }
         } else {
             Pitch_angle_command = 0.4 * Stick[ELEVATOR];
