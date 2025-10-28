@@ -212,6 +212,9 @@ volatile float Alt_ref = Alt_ref0;
 uint8_t ahrs_reset_flag      = 0;
 uint8_t last_ahrs_reset_flag = 0;
 
+bool forward_mode_flag = false;
+uint8_t forward_mode_counter = 0;
+
 // Function declaration
 void init_pwm();
 void control_init();
@@ -656,7 +659,8 @@ void get_command(void) {
             Auto_takeoff_counter++;
         } else {
             Thrust0 = get_trim_duty(Voltage);
-            Mode = FLIP_MODE;  // 離陸完了後、Flipモードへ移行
+            forward_mode_flag = true;
+            // Mode = FLIP_MODE;  // 離陸完了後、Flipモードへ移行
         }
         // Get Altitude ref
         if ((-0.2 < thlo) && (thlo < 0.2)) thlo = 0.0f;  // 不感帯
@@ -674,7 +678,18 @@ void get_command(void) {
         Roll_angle_command = 0.4 * Stick[AILERON];
         if (Roll_angle_command < -1.0f) Roll_angle_command = -1.0f;
         if (Roll_angle_command > 1.0f) Roll_angle_command = 1.0f;
-        Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+        if (forward_mode_flag)
+        {
+            Pitch_angle_command = -0.3;
+            forward_mode_counter++;
+            if (forward_mode_counter > 300)
+            {
+                forward_mode_flag = false;
+                forward_mode_counter = 0;
+            }
+        } else {
+            Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+        }
         if (Pitch_angle_command < -1.0f) Pitch_angle_command = -1.0f;
         if (Pitch_angle_command > 1.0f) Pitch_angle_command = 1.0f;
     } else if (Control_mode == RATECONTROL) {
