@@ -3,7 +3,6 @@ import * as Blockly from 'blockly';
 // 💡 C++ジェネレーターは標準ではないため、別途カスタム実装が必要です。
 // ここでは仮のオブジェクトとして定義し、後ほど中身を実装します。
 const Cpp = new Blockly.Generator('Cpp'); 
-import { javascriptGenerator } from 'blockly/javascript'; // テスト用にインポート
 
 // --- 1. StampFlyカスタムブロックの定義 ---
 const defineStampFlyBlocks = () => {
@@ -28,48 +27,84 @@ const defineStampFlyBlocks = () => {
     }
   };
 
-  Blockly.Blocks['flip'] = {
+  Blockly.Blocks['forward_1s'] = {
     init: function() {
-      this.appendDummyInput().appendField("反転 ✈️");
+      this.appendDummyInput().appendField("前 １秒 ⬆️");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(20);
-      this.setTooltip("ドローンが前方に宙返りします。");
+      this.setTooltip("ドローンを前方に1秒間移動させます。");
     }
   };
 
-  Blockly.Blocks['fly_up'] = {
+  Blockly.Blocks['right_1s'] = {
     init: function() {
-      this.appendDummyInput()
-          .appendField("上昇 (距離:")
-          .appendField(new Blockly.FieldNumber(50, 10, 200), "DISTANCE") // 10cmから200cmまで
-          .appendField("cm)");
+      this.appendDummyInput().appendField("右 １秒 ➡️");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(20);
-      this.setTooltip("現在の位置から指定された距離だけ垂直に上昇します。");
+      this.setTooltip("ドローンを右方向に1秒間移動させます。");
+    }
+  };
+
+  Blockly.Blocks['left_1s'] = {
+    init: function() {
+      this.appendDummyInput().appendField("左 １秒 ⬅️");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("ドローンを左方向に1秒間移動させます。");
+    }
+  };
+
+  Blockly.Blocks['back_1s'] = {
+    init: function() {
+      this.appendDummyInput().appendField("後ろ １秒 ⬇️");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("ドローンを後方に1秒間移動させます。");
+    }
+  };
+
+  Blockly.Blocks['rotate'] = {
+    init: function() {
+      this.appendDummyInput().appendField("回転 🔄");
+      this.setPreviousStatement(true, null);
+      this.setNextStatement(true, null);
+      this.setColour(20);
+      this.setTooltip("ドローンを回転させます。");
     }
   };
 
   // --- 1-2. C++コード生成器を定義 ---
   // 💡 ここがC++コードを出力する重要な部分です
-  Cpp['take_off'] = function(block) {
+  Cpp['take_off'] = function() {
     return 'take_off();\n';
   };
 
-  Cpp['land'] = function(block) {
+  Cpp['land'] = function() {
     return 'land();\n';
   };
 
-  // C++ジェネレーター: flip ブロック
-  Cpp['flip'] = function(block) {
-    // ドローンを前方に宙返りさせる呼び出しを生成します
-    return 'flip();\n';
+  Cpp['forward_1s'] = function() {
+    return 'forward_1s();\n';
   };
 
-  Cpp['fly_up'] = function(block) {
-    const distance = block.getFieldValue('DISTANCE');
-    return `fly_up(${distance});\n`;
+  Cpp['right_1s'] = function() {
+    return 'right_1s();\n';
+  };
+
+  Cpp['left_1s'] = function() {
+    return 'left_1s();\n';
+  };
+
+  Cpp['back_1s'] = function() {
+    return 'back_1s();\n';
+  };
+
+  Cpp['rotate'] = function() {
+    return 'rotate();\n';
   };
 };
 
@@ -81,16 +116,11 @@ const toolboxXml = `
         <block type="land"></block>
     </category>
     <category name="移動と制御" colour="20">
-    <block type="flip"></block>
-    <block type="fly_up"></block>
-        <block type="controls_repeat_ext">
-            <value name="TIMES">
-                <block type="math_number"><field name="NUM">3</field></block>
-            </value>
-        </block>
-    </category>
-    <category name="その他" colour="60">
-        <block type="math_number"></block>
+        <block type="forward_1s"></block>
+        <block type="right_1s"></block>
+        <block type="left_1s"></block>
+        <block type="back_1s"></block>
+        <block type="rotate"></block>
     </category>
 </xml>
 `;
@@ -213,7 +243,7 @@ ${codeString}
             workspace.current = null;
         }
     };
-  }, [updateCode]); // updateCodeが変更されたときのみ再実行
+  }, [updateCode, detectAndWriteTakeOff]); // updateCodeとdetectAndWriteTakeOffが変更されたときのみ再実行
 
   return (
     <div style={{ display: 'flex', height: '80vh', width: '100%' }}>
