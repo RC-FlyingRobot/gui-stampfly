@@ -96,7 +96,6 @@ const DroneSimulator = ({ workspace }) => {
           newState.currentAction = '➡️ 右移動中';
           break;
         case 'rotate':
-          newState.rotation = (prev.rotation + 90) % 360;
           newState.isFlipping = true;
           newState.currentAction = '🔄 回転中';
           setTimeout(() => {
@@ -152,19 +151,6 @@ const DroneSimulator = ({ workspace }) => {
         >
           ⏹️ 停止
         </button>
-        <label style={{ marginLeft: '20px' }}>
-          速度: 
-          <input 
-            type="range" 
-            min="300" 
-            max="2000" 
-            value={simulationSpeed}
-            onChange={(e) => setSimulationSpeed(Number(e.target.value))}
-            disabled={isSimulating}
-            style={{ marginLeft: '10px' }}
-          />
-          {(simulationSpeed / 1000).toFixed(1)}秒
-        </label>
       </div>
 
       {/* ステータス表示 */}
@@ -181,9 +167,6 @@ const DroneSimulator = ({ workspace }) => {
         </div>
         <div>
           <strong>高度:</strong> {droneState.altitude === 0 ? '地上 🟤' : '飛行中 🟦'}
-        </div>
-        <div>
-          <strong>回転:</strong> {droneState.rotation}°
         </div>
       </div>
 
