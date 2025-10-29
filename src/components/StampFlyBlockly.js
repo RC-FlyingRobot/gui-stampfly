@@ -129,6 +129,8 @@ const toolboxXml = `
 defineStampFlyBlocks();
 
 // --- 3. Reactコンポーネント本体 ---
+import DroneSimulator from './DroneSimulator';
+
 const StampFlyBlockly = () => {
   const blocklyDiv = useRef(null); 
   const workspace = useRef(null); 
@@ -272,33 +274,60 @@ ${codeString}}`;
   }, [updateCode, detectAndWriteTakeOff]); // updateCodeとdetectAndWriteTakeOffが変更されたときのみ再実行
 
   return (
-    <div style={{ display: 'flex', height: '80vh', width: '100%' }}>
-      {/* Blocklyワークスペースエリア */}
-      <div ref={blocklyDiv} style={{ flex: '3', minWidth: '600px', border: '1px solid #ddd' }} />
+    <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
+      {/* 左側: Blocklyワークスペース */}
+      <div ref={blocklyDiv} style={{ flex: '1', minWidth: '400px', border: '1px solid #ddd' }} />
       
-      {/* コードとコントロールパネル */}
-      <div style={{ flex: '1', padding: '20px', backgroundColor: '#f9f9f9', borderLeft: '1px solid #ccc' }}>
-        <h2>📝 生成された C++ コード</h2>
-        <div style={{ backgroundColor: '#eee', padding: '10px', height: '50%', overflowY: 'auto', border: '1px solid #ccc' }}>
-          <pre>{code}</pre>
+      {/* 右側: コード、シミュレーター、ボタン */}
+      <div style={{ 
+        flex: '1', 
+        display: 'flex', 
+        flexDirection: 'column',
+        backgroundColor: '#f9f9f9', 
+        borderLeft: '1px solid #ccc',
+        overflow: 'hidden'
+      }}>
+        {/* コード表示エリア */}
+        {/* <div style={{ padding: '15px', borderBottom: '1px solid #ddd', flexShrink: 0 }}>
+          <h3 style={{ margin: '0 0 10px 0', fontSize: '1em' }}>📝 生成された C++ コード</h3>
+          <div style={{ 
+            backgroundColor: '#eee', 
+            padding: '10px', 
+            height: '120px', 
+            overflowY: 'auto', 
+            border: '1px solid #ccc',
+            fontSize: '11px'
+          }}>
+            <pre style={{ margin: 0 }}>{code}</pre>
+          </div>
+        </div> */}
+
+        {/* シミュレーターエリア */}
+        <div style={{ flex: '1', borderBottom: '1px solid #ddd', overflow: 'auto', minHeight: 0 }}>
+          <DroneSimulator workspace={workspace.current} />
         </div>
-        
-        <div style={{ marginTop: '20px' }}>
-            <button 
-                onClick={writeCodeToFile} 
-                style={{ 
-                    padding: '15px 30px', 
-                    fontSize: '1.2em', 
-                    backgroundColor: '#4CAF50', 
-                    color: 'white', 
-                    border: 'none', 
-                    borderRadius: '8px',
-                    cursor: 'pointer'
-                }}
-            >
-                💾 コードをファイルに書き込む
-            </button>
-            <p style={{ marginTop: '15px', fontWeight: 'bold' }}>ステータス: {status}</p>
+
+        {/* 書き込みボタンエリア */}
+        <div style={{ padding: '15px', flexShrink: 0 }}>
+          <button 
+            onClick={writeCodeToFile} 
+            style={{ 
+              width: '100%',
+              padding: '12px', 
+              fontSize: '1em', 
+              backgroundColor: '#4CAF50', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            💾 コードをファイルに書き込む
+          </button>
+          <p style={{ marginTop: '8px', fontWeight: 'bold', textAlign: 'center', fontSize: '0.9em', margin: '8px 0 0 0' }}>
+            ステータス: {status}
+          </p>
         </div>
       </div>
     </div>
