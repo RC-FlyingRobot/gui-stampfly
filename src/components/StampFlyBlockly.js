@@ -80,31 +80,31 @@ const defineStampFlyBlocks = () => {
   // --- 1-2. C++コード生成器を定義 ---
   // 💡 ここがC++コードを出力する重要な部分です
   Cpp['take_off'] = function() {
-    return 'take_off();\n';
+    return '  take_off();\n';
   };
 
   Cpp['land'] = function() {
-    return 'land();\n';
+    return '  take_on();\n';
   };
 
   Cpp['forward_1s'] = function() {
-    return 'forward_1s();\n';
+    return '  forward();\n';
   };
 
   Cpp['right_1s'] = function() {
-    return 'right_1s();\n';
+    return '  right();\n';
   };
 
   Cpp['left_1s'] = function() {
-    return 'left_1s();\n';
+    return '  left();\n';
   };
 
   Cpp['back_1s'] = function() {
-    return 'back_1s();\n';
+    return '  back();\n';
   };
 
   Cpp['rotate'] = function() {
-    return 'rotate();\n';
+    return '  flip();\n';
   };
 };
 
@@ -135,18 +135,44 @@ const StampFlyBlockly = () => {
   const [code, setCode] = useState('');
   const [status, setStatus] = useState('待機中...');
   
+  // ブロックタイプから関数名へのマッピング
+  const blockToFunction = {
+    'take_off': 'take_off()',
+    'land': 'take_on()',
+    'forward_1s': 'forward()',
+    'right_1s': 'right()',
+    'left_1s': 'left()',
+    'back_1s': 'back()',
+    'rotate': 'flip()'
+  };
+
   // ワークスペース変更時にコードを再生成し、ステートを更新するコールバック
   const updateCode = useCallback(() => {
     if (workspace.current) {
-        // C++のカスタムジェネレーターを使ってコードを生成
-        const codeString = "    take_off();\n"; // テスト用に固定コードを追加
+        // ワークスペースから全てのトップレベルブロックを取得
+        const topBlocks = workspace.current.getTopBlocks(true);
+        
+        let codeString = '';
+        
+        // 各トップレベルブロックから順番に関数呼び出しを生成
+        topBlocks.forEach(block => {
+          let currentBlock = block;
+          
+          // ブロックのチェーンを辿って順番に処理
+          while (currentBlock) {
+            const functionCall = blockToFunction[currentBlock.type];
+            if (functionCall) {
+              codeString += `  ${functionCall};\n`;
+            }
+            currentBlock = currentBlock.getNextBlock();
+          }
+        });
         
         // StampFlyのファームウェアの構造に合わせてコードを整形
         const fullCode = 
 `// ユーザーが生成したプログラム
 void user_loop() {
-${codeString}
-}`;
+${codeString}}`;
         setCode(fullCode);
     }
   }, []);
