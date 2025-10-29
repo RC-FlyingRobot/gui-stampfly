@@ -1,0 +1,27 @@
+{
+  "name": "StampFly - ドローンプログラミング教育プラットフォーム",
+  "short_name": "StampFly",
+  "description": "Blocklyを使用したビジュアルプログラミングでドローンを制御できる教育プラットフォーム",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education", "productivity", "utilities"],
+  "lang": "ja",
+  "dir": "ltr"
+}
