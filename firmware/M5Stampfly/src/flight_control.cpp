@@ -221,12 +221,11 @@ typedef enum {
     LEFT,
     BACK,
     NORMAL,
-    STOP = 100,
+    STOP,
 } Direction_t;
 
-Direction_t direction_flag = STOP;
+Direction_t direction_flag = NORMAL;
 uint32_t direction_counter = 0;
-
 uint8_t direction_changed_times = 0;
 
 
@@ -674,7 +673,7 @@ void get_command(void) {
             Auto_takeoff_counter++;
         } else {
             Thrust0 = get_trim_duty(Voltage);
-            forward_mode_flag = true;
+            direction_flag = FORWARD;
             // Mode = FLIP_MODE;  // 離陸完了後、Flipモードへ移行
         }
         // Get Altitude ref
@@ -690,15 +689,10 @@ void get_command(void) {
     }
 
     if (Control_mode == ANGLECONTROL) {
-        // テストで今回は前進固定
-        if (direction_changed_times == 0) {
-            direction_flag = FORWARD;
-        } else {
-            direction_flag = NORMAL;
-        }
+        
         switch (direction_flag) {
             case FORWARD:
-                Pitch_angle_command = 0.15;
+                Pitch_angle_command = -0.15;
                 Roll_angle_command = 0.4 * Stick[AILERON];
                 break;
             case RIGHT:
@@ -710,7 +704,7 @@ void get_command(void) {
                 Pitch_angle_command = 0.4 * Stick[ELEVATOR];
                 break;
             case BACK:
-                Pitch_angle_command = -0.15;
+                Pitch_angle_command = 0.15;
                 Roll_angle_command = 0.4 * Stick[AILERON];
                 break;
             case NORMAL: 
