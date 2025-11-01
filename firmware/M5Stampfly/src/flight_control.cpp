@@ -702,93 +702,64 @@ void get_command(void) {
             Roll_angle_command  = 0.0;
         } else {
             switch (direction) {
+                case FORWARD:
+                    if (direction_counter < 300) {
+                        // 加速・巡航フェーズ
+                        Pitch_angle_command = -0.15;
+                    } else if (direction_counter < 400) {
+                        // 減速フェーズ（逆方向に傾ける）
+                        Pitch_angle_command = 0.10;
+                    } else {
+                        Pitch_angle_command = 0.0;
+                    }
+                    Roll_angle_command = 0.4f * Stick[AILERON];
+                    break;
 
-			case FORWARD:
-				 if (direction_counter < 300) {
-					 // 加速・巡航フェーズ
-					 Pitch_angle_command = -0.15;
-				 } else if (direction_counter < 400) {
-					 // 減速フェーズ（逆方向に傾ける）
-					 Pitch_angle_command = 0.10;  // 前進の逆
-				 } else {
-					 Pitch_angle_command = 0.0;  // 水平を維持
-				 }
-				 Roll_angle_command = 0.4 * Stick[AILERON];
-				 break;
-			 
-			 case BACK:
-				 if (direction_counter < 300) {
-					 Pitch_angle_command = 0.15;
-				 } else if (direction_counter < 400) {
-					 Pitch_angle_command = -0.10;  // 後退の逆
-				 } else {
-					 Pitch_angle_command = 0.0;
-				 }
-				 Roll_angle_command = 0.4 * Stick[AILERON];
-				 break;
-			 
-			 case RIGHT:
-				 if (direction_counter < 300) {
-					 Roll_angle_command = 0.15;
-				 } else if (direction_counter < 400) {
-					 Roll_angle_command = -0.10;  // 右移動の逆
-				 } else {
-					 Roll_angle_command = 0.0;
-				 }
-				 Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-				 break;
-			 
-			 case LEFT:
-				 if (direction_counter < 300) {
-					 Roll_angle_command = -0.15;
-				 } else if (direction_counter < 400) {
-					 Roll_angle_command = 0.10;  // 左移動の逆
-				 } else {
-					 Roll_angle_command = 0.0;
-				 }
-				 Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-				 break;
-					case NORMAL: 
-						Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-						Roll_angle_command  = 0.4 * Stick[AILERON];
-						break;
-					default:
-						Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-						Roll_angle_command  = 0.4 * Stick[AILERON];
-						break;
-					}
-				}
+                case BACK:
+                    if (direction_counter < 300) {
+                        Pitch_angle_command = 0.15;
+                    } else if (direction_counter < 400) {
+                        Pitch_angle_command = -0.10;
+                    } else {
+                        Pitch_angle_command = 0.0;
+                    }
+                    Roll_angle_command = 0.4f * Stick[AILERON];
+                    break;
 
+                case RIGHT:
+                    if (direction_counter < 300) {
+                        Roll_angle_command = 0.15;
+                    } else if (direction_counter < 400) {
+                        Roll_angle_command = -0.10;
+                    } else {
+                        Roll_angle_command = 0.0;
+                    }
+                    Pitch_angle_command = 0.4f * Stick[ELEVATOR];
+                    break;
 
+                case LEFT:
+                    if (direction_counter < 300) {
+                        Roll_angle_command = -0.15;
+                    } else if (direction_counter < 400) {
+                        Roll_angle_command = 0.10;
+                    } else {
+                        Roll_angle_command = 0.0;
+                    }
+                    Pitch_angle_command = 0.4f * Stick[ELEVATOR];
+                    break;
 
-
-
-            default:
-                Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-                Roll_angle_command  = 0.4 * Stick[AILERON];
-                break;
+                case NORMAL:
+                default:
+                    Pitch_angle_command = 0.4f * Stick[ELEVATOR];
+                    Roll_angle_command  = 0.4f * Stick[AILERON];
+                    break;
             }
         }
-        
-        // Roll_angle_command = 0.4 * Stick[AILERON];
+
         if (Roll_angle_command < -1.0f) Roll_angle_command = -1.0f;
-        if (Roll_angle_command > 1.0f) Roll_angle_command = 1.0f;
-        // 前進2秒
-        // if (forward_mode_flag)
-        // {
-        //     Pitch_angle_command = -0.15;
-        //     forward_mode_counter++;
-        //     if (forward_mode_counter > 800)
-        //     {
-        //         forward_mode_flag = false;
-        //         forward_mode_counter = 0;
-        //         Mode = FLIP_MODE;
-        //     }
-        // } else {
-        //     Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-        // }
+        if (Roll_angle_command > 1.0f)  Roll_angle_command = 1.0f;
         if (Pitch_angle_command < -1.0f) Pitch_angle_command = -1.0f;
-        if (Pitch_angle_command > 1.0f) Pitch_angle_command = 1.0f;
+        if (Pitch_angle_command > 1.0f)  Pitch_angle_command = 1.0f;
 
         if (direction != NORMAL && Mode != FLIP_MODE) {
             direction_counter++;
@@ -797,13 +768,17 @@ void get_command(void) {
                 direction_changed_times++;
                 if (direction_changed_times >= MAX_STATES_NUM) {
                     direction = NORMAL;
-                    Mode = AUTO_LANDING_MODE;
+                    Mode      = AUTO_LANDING_MODE;
                 } else {
                     direction = direction_sequence[direction_changed_times];
                     if (direction == FLIP) {
                         Mode = FLIP_MODE;
                         direction_changed_times++;
-                        direction = direction_sequence[direction_changed_times];
+                        if (direction_changed_times < MAX_STATES_NUM) {
+                            direction = direction_sequence[direction_changed_times];
+                        } else {
+                            direction = NORMAL;
+                        }
                     }
                 }
             }
