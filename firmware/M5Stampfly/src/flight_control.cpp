@@ -702,26 +702,67 @@ void get_command(void) {
             Roll_angle_command  = 0.0;
         } else {
             switch (direction) {
-            case FORWARD:
-                Pitch_angle_command = -0.15;
-                Roll_angle_command = 0.4 * Stick[AILERON];
-                break;
-            case RIGHT:
-                Roll_angle_command  = 0.15;
-                Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-                break;
-            case LEFT:
-                Roll_angle_command  = -0.15;
-                Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-                break;
-            case BACK:
-                Pitch_angle_command = 0.15;
-                Roll_angle_command = 0.4 * Stick[AILERON];
-                break;
-            case NORMAL: 
-                Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-                Roll_angle_command  = 0.4 * Stick[AILERON];
-                break;
+
+			case FORWARD:
+				 if (direction_counter < 300) {
+					 // 加速・巡航フェーズ
+					 Pitch_angle_command = -0.15;
+				 } else if (direction_counter < 400) {
+					 // 減速フェーズ（逆方向に傾ける）
+					 Pitch_angle_command = 0.10;  // 前進の逆
+				 } else {
+					 Pitch_angle_command = 0.0;  // 水平を維持
+				 }
+				 Roll_angle_command = 0.4 * Stick[AILERON];
+				 break;
+			 
+			 case BACK:
+				 if (direction_counter < 300) {
+					 Pitch_angle_command = 0.15;
+				 } else if (direction_counter < 400) {
+					 Pitch_angle_command = -0.10;  // 後退の逆
+				 } else {
+					 Pitch_angle_command = 0.0;
+				 }
+				 Roll_angle_command = 0.4 * Stick[AILERON];
+				 break;
+			 
+			 case RIGHT:
+				 if (direction_counter < 300) {
+					 Roll_angle_command = 0.15;
+				 } else if (direction_counter < 400) {
+					 Roll_angle_command = -0.10;  // 右移動の逆
+				 } else {
+					 Roll_angle_command = 0.0;
+				 }
+				 Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+				 break;
+			 
+			 case LEFT:
+				 if (direction_counter < 300) {
+					 Roll_angle_command = -0.15;
+				 } else if (direction_counter < 400) {
+					 Roll_angle_command = 0.10;  // 左移動の逆
+				 } else {
+					 Roll_angle_command = 0.0;
+				 }
+				 Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+				 break;
+					case NORMAL: 
+						Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+						Roll_angle_command  = 0.4 * Stick[AILERON];
+						break;
+					default:
+						Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+						Roll_angle_command  = 0.4 * Stick[AILERON];
+						break;
+					}
+				}
+
+
+
+
+
             default:
                 Pitch_angle_command = 0.4 * Stick[ELEVATOR];
                 Roll_angle_command  = 0.4 * Stick[AILERON];
