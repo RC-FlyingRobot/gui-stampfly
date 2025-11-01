@@ -215,6 +215,21 @@ uint8_t last_ahrs_reset_flag = 0;
 bool forward_mode_flag = false;
 uint32_t forward_mode_counter = 0;
 
+typedef enum {
+    FORWARD,
+    RIGHT,
+    LEFT,
+    BACK,
+    NORMAL,
+    STOP = 100,
+} Direction_t;
+
+Direction_t direction_flag = STOP;
+uint32_t direction_counter = 0;
+
+uint8_t direction_changed_times = 0;
+
+
 // Function declaration
 void init_pwm();
 void control_init();
@@ -675,24 +690,67 @@ void get_command(void) {
     }
 
     if (Control_mode == ANGLECONTROL) {
-        Roll_angle_command = 0.4 * Stick[AILERON];
+        // テストで今回は前進固定
+        if (direction_changed_times == 0) {
+            direction_flag = FORWARD;
+        } else {
+            direction_flag = NORMAL;
+        }
+        switch (direction_flag) {
+            case FORWARD:
+                Pitch_angle_command = 0.15;
+                Roll_angle_command = 0.4 * Stick[AILERON];
+                break;
+            case RIGHT:
+                Roll_angle_command  = 0.15;
+                Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+                break;
+            case LEFT:
+                Roll_angle_command  = -0.15;
+                Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+                break;
+            case BACK:
+                Pitch_angle_command = -0.15;
+                Roll_angle_command = 0.4 * Stick[AILERON];
+                break;
+            case NORMAL: 
+                Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+                Roll_angle_command  = 0.4 * Stick[AILERON];
+                break;
+            case STOP:
+                Pitch_angle_command = 0.0;
+                Roll_angle_command  = 0.0;
+                break;
+            default:
+                Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+                Roll_angle_command  = 0.4 * Stick[AILERON];
+                break;
+        }
+        // Roll_angle_command = 0.4 * Stick[AILERON];
         if (Roll_angle_command < -1.0f) Roll_angle_command = -1.0f;
         if (Roll_angle_command > 1.0f) Roll_angle_command = 1.0f;
-        if (forward_mode_flag)
-        {
-            Pitch_angle_command = -0.15;
-            forward_mode_counter++;
-            if (forward_mode_counter > 800)
-            {
-                forward_mode_flag = false;
-                forward_mode_counter = 0;
-                Mode = FLIP_MODE;
-            }
-        } else {
-            Pitch_angle_command = 0.4 * Stick[ELEVATOR];
-        }
+        // 前進2秒
+        // if (forward_mode_flag)
+        // {
+        //     Pitch_angle_command = -0.15;
+        //     forward_mode_counter++;
+        //     if (forward_mode_counter > 800)
+        //     {
+        //         forward_mode_flag = false;
+        //         forward_mode_counter = 0;
+        //         Mode = FLIP_MODE;
+        //     }
+        // } else {
+        //     Pitch_angle_command = 0.4 * Stick[ELEVATOR];
+        // }
         if (Pitch_angle_command < -1.0f) Pitch_angle_command = -1.0f;
         if (Pitch_angle_command > 1.0f) Pitch_angle_command = 1.0f;
+        direction_counter++;
+        if (direction_counter > 400) {
+            direction_counter = 0;
+            direction_flag = NORMAL;
+            direction_changed_times++;
+        }
     } else if (Control_mode == RATECONTROL) {
         Roll_rate_reference  = get_rate_ref(Stick[AILERON]);
         Pitch_rate_reference = get_rate_ref(Stick[ELEVATOR]);
