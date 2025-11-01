@@ -230,7 +230,7 @@ uint8_t direction_changed_times = 0;
 
 bool takeoff_completed = false;
 
-Direction_t direction_sequence[] = {FORWARD, RIGHT, LEFT, BACK, FLIP, FORWARD, BACK, BACK, BACK};
+Direction_t direction_sequence[] = {FORWARD, BACK, FORWARD, BACK, FORWARD, BACK};
 
 uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[0]);
 
