@@ -221,13 +221,18 @@ typedef enum {
     LEFT,
     BACK,
     NORMAL,
-    STOP,
+    FLIP,
 } Direction_t;
 
-Direction_t direction_flag = NORMAL;
+Direction_t direction = NORMAL;
 uint32_t direction_counter = 0;
 uint8_t direction_changed_times = 0;
 
+bool takeoff_completed = false;
+
+Direction_t direction_sequence[] = {FORWARD, RIGHT, LEFT, BACK, FLIP, FORWARD, BACK, BACK, BACK};
+
+uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[0]);
 
 // Function declaration
 void init_pwm();
@@ -540,7 +545,7 @@ void flip(void) {
         Flip_flag       = 0;
         Ahrs_reset_flag = 0;
         Flip_counter    = 0;
-        Mode            = AUTO_LANDING_MODE;
+        Mode            = FLIGHT_MODE;
     }
 }
 
@@ -673,7 +678,7 @@ void get_command(void) {
             Auto_takeoff_counter++;
         } else {
             Thrust0 = get_trim_duty(Voltage);
-            direction_flag = FORWARD;
+            takeoff_completed = true;
             // Mode = FLIP_MODE;  // 離陸完了後、Flipモードへ移行
         }
         // Get Altitude ref
@@ -689,8 +694,14 @@ void get_command(void) {
     }
 
     if (Control_mode == ANGLECONTROL) {
-        
-        switch (direction_flag) {
+        if (takeoff_completed == true && direction_changed_times == 0) {
+            direction = direction_sequence[0];
+        }
+        if (Mode == FLIP_MODE) {
+            Pitch_angle_command = 0.0;
+            Roll_angle_command  = 0.0;
+        } else {
+            switch (direction) {
             case FORWARD:
                 Pitch_angle_command = -0.15;
                 Roll_angle_command = 0.4 * Stick[AILERON];
@@ -711,15 +722,13 @@ void get_command(void) {
                 Pitch_angle_command = 0.4 * Stick[ELEVATOR];
                 Roll_angle_command  = 0.4 * Stick[AILERON];
                 break;
-            case STOP:
-                Pitch_angle_command = 0.0;
-                Roll_angle_command  = 0.0;
-                break;
             default:
                 Pitch_angle_command = 0.4 * Stick[ELEVATOR];
                 Roll_angle_command  = 0.4 * Stick[AILERON];
                 break;
+            }
         }
+        
         // Roll_angle_command = 0.4 * Stick[AILERON];
         if (Roll_angle_command < -1.0f) Roll_angle_command = -1.0f;
         if (Roll_angle_command > 1.0f) Roll_angle_command = 1.0f;
@@ -739,11 +748,24 @@ void get_command(void) {
         // }
         if (Pitch_angle_command < -1.0f) Pitch_angle_command = -1.0f;
         if (Pitch_angle_command > 1.0f) Pitch_angle_command = 1.0f;
-        direction_counter++;
-        if (direction_counter > 400) {
-            direction_counter = 0;
-            direction_flag = NORMAL;
-            direction_changed_times++;
+
+        if (direction != NORMAL && Mode != FLIP_MODE) {
+            direction_counter++;
+            if (direction_counter > 400) {
+                direction_counter = 0;
+                direction_changed_times++;
+                if (direction_changed_times >= MAX_STATES_NUM) {
+                    direction = NORMAL;
+                    Mode = AUTO_LANDING_MODE;
+                } else {
+                    direction = direction_sequence[direction_changed_times];
+                    if (direction == FLIP) {
+                        Mode = FLIP_MODE;
+                        direction_changed_times++;
+                        direction = direction_sequence[direction_changed_times];
+                    }
+                }
+            }
         }
     } else if (Control_mode == RATECONTROL) {
         Roll_rate_reference  = get_rate_ref(Stick[AILERON]);
