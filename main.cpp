@@ -1,3 +1,1 @@
-// ユーザーが生成したプログラム
-void user_loop() {
-}
+API_WRITE_TEST_$(date +%s)

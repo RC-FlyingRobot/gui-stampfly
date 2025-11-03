@@ -1,30 +1,45 @@
 import fs from 'fs';
 import path from 'path';
 
-// 使用方法:
-// - 開発環境で別フォルダに書き込みたい場合は環境変数 TARGET_FILE_PATH を絶対パスで設定してください。
-//   例: TARGET_FILE_PATH=/Users/you/PlatformIOProject/src/main.cpp
-// - 指定がない場合はプロジェクトルート直下の main.cpp に書き込みます（安全のためにデフォルトはプロジェクト内）。
-const TARGET_FILE_PATH = process.env.TARGET_FILE_PATH || path.join(process.cwd(), 'main.cpp');
+// セキュアなベースディレクトリ: リポジトリ内の `firmware` フォルダを想定
+// クライアントからは相対パス (例: "M5Stampfly/src/flight_control.cpp") を渡してください。
+// 環境変数で別のベースフォルダを指定したい場合は WRITE_BASE_DIR を設定してください。
+const BASE_DIR = process.env.WRITE_BASE_DIR || path.join(process.cwd(), 'firmware');
 
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { code } = body || {};
+    const { code, filename } = body || {};
 
     if (!code) {
       return new Response(JSON.stringify({ message: '書き込むコードがありません。' }), { status: 400 });
     }
 
-    // ディレクトリが存在しない場合は作成する
-    const dir = path.dirname(TARGET_FILE_PATH);
+    if (!filename || typeof filename !== 'string') {
+      return new Response(
+        JSON.stringify({ message: '書き込むファイル名 (filename) を相対パスで指定してください。例: "M5Stampfly/src/flight_control.cpp"' }),
+        { status: 400 }
+      );
+    }
+
+    // ベースディレクトリ以下に限定してパス横取りを防止
+    const targetPath = path.resolve(BASE_DIR, filename);
+    const resolvedBase = path.resolve(BASE_DIR);
+
+    if (!targetPath.startsWith(resolvedBase + path.sep) && targetPath !== resolvedBase) {
+      console.error('[API Error] Attempted path traversal or outside BASE_DIR:', targetPath);
+      return new Response(JSON.stringify({ message: '不正なファイルパスです。許可されているディレクトリ内の相対パスを指定してください。' }), { status: 400 });
+    }
+
+    // 必要ならディレクトリを作成
+    const dir = path.dirname(targetPath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    fs.writeFileSync(TARGET_FILE_PATH, code, 'utf-8');
-    console.log(`[API] Code written to: ${TARGET_FILE_PATH}`);
-    return new Response(JSON.stringify({ message: 'ファイルが正常に書き込まれました。' }), { status: 200 });
+    fs.writeFileSync(targetPath, code, 'utf-8');
+    console.log(`[API] Code written to: ${targetPath}`);
+    return new Response(JSON.stringify({ message: 'ファイルが正常に書き込まれました。', path: targetPath, baseDir: resolvedBase }), { status: 200 });
   } catch (error) {
     console.error('[API Error] File writing failed:', error);
     return new Response(

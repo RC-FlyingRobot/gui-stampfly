@@ -136,6 +136,8 @@ const StampFlyBlockly = () => {
   const workspace = useRef(null); 
   const [code, setCode] = useState('');
   const [status, setStatus] = useState('待機中...');
+  // 書き込み先のデフォルトファイル名（BASE_DIR 以下の相対パス）
+  const TARGET_FILENAME = 'M5Stampfly/src/flight_control.cpp';
   
   // ブロックタイプから関数名へのマッピング
   const blockToFunction = {
@@ -195,14 +197,15 @@ ${codeString}}`;
         const response = await fetch('/api/write-file', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: takeoffCode }),
+          body: JSON.stringify({ code: takeoffCode, filename: TARGET_FILENAME }),
         });
 
+        const respJson = await response.json().catch(() => ({}));
         if (response.ok) {
-          setStatus('✅ takeof() を main.cpp に書き込みました');
+          // サーバーが返した書き込み先パスを表示
+          setStatus(`✅ takeof() を書き込みました: ${respJson.path || 'パス不明'}`);
         } else {
-          const err = await response.json().catch(() => ({}));
-          setStatus(`❌ takeof() 書き込み失敗: ${err.message || response.statusText}`);
+          setStatus(`❌ takeof() 書き込み失敗: ${respJson.message || response.statusText}`);
         }
       } catch (error) {
         console.error('自動書き込みエラー:', error);
@@ -218,15 +221,15 @@ ${codeString}}`;
       const response = await fetch('/api/write-file', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code }),
+        body: JSON.stringify({ code: code, filename: TARGET_FILENAME }),
       });
 
+      const respJson = await response.json().catch(() => ({}));
       if (response.ok) {
-        setStatus('✅ 書き込み成功！ドローンに転送できます。');
-        alert('コードがローカルの.cppファイルに保存されました！\nスタッフはターミナルでPlatformIOコマンドを実行してください。');
+        setStatus(`✅ 書き込み成功！保存先: ${respJson.path || '不明'}`);
+        alert(`コードがローカルのファイルに保存されました: ${respJson.path || TARGET_FILENAME}\nターミナルでPlatformIOコマンドを実行してください。`);
       } else {
-        const errorData = await response.json();
-        setStatus(`❌ 書き込み失敗: ${errorData.message}`);
+        setStatus(`❌ 書き込み失敗: ${respJson.message || response.statusText}`);
       }
     } catch (error) {
       console.error('API通信エラー:', error);
