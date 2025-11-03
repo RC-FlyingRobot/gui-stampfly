@@ -137,17 +137,17 @@ const StampFlyBlockly = () => {
   const [code, setCode] = useState('');
   const [status, setStatus] = useState('待機中...');
   // 書き込み先のデフォルトファイル名（BASE_DIR 以下の相対パス）
-  const TARGET_FILENAME = 'M5Stampfly/src/flight_control.cpp';
+  const TARGET_FILENAME = 'M5Stampfly/src/direction_sequence.hpp';
   
-  // ブロックタイプから関数名へのマッピング
-  const blockToFunction = {
-    'take_off': 'take_off()',
-    'land': 'take_on()',
-    'forward_1s': 'forward()',
-    'right_1s': 'right()',
-    'left_1s': 'left()',
-    'back_1s': 'back()',
-    'rotate': 'flip()'
+  // ブロックタイプから Direction_t 列挙値へのマッピング
+  const blockToDirection = {
+    'take_off': '',
+    'land': '',
+    'forward_1s': 'FORWARD',
+    'right_1s': 'RIGHT',
+    'left_1s': 'LEFT',
+    'back_1s': 'BACK',
+    'rotate': 'FLIP',
   };
 
   // ワークスペース変更時にコードを再生成し、ステートを更新するコールバック
@@ -156,78 +156,74 @@ const StampFlyBlockly = () => {
         // ワークスペースから全てのトップレベルブロックを取得
         const topBlocks = workspace.current.getTopBlocks(true);
         
-        let codeString = '';
+        const directionList = [];
         
-        // 各トップレベルブロックから順番に関数呼び出しを生成
+        // 各トップレベルブロックから順番にDirection_t列挙値を収集
         topBlocks.forEach(block => {
           let currentBlock = block;
           
           // ブロックのチェーンを辿って順番に処理
           while (currentBlock) {
-            const functionCall = blockToFunction[currentBlock.type];
-            if (functionCall) {
-              codeString += `  ${functionCall};\n`;
+            const direction = blockToDirection[currentBlock.type];
+            if (direction) {
+              directionList.push(direction);
             }
             currentBlock = currentBlock.getNextBlock();
           }
         });
         
-        // StampFlyのファームウェアの構造に合わせてコードを整形
-        const fullCode = 
-`// ユーザーが生成したプログラム
-void user_loop() {
-${codeString}}`;
+        // direction_sequence[] の配列宣言のみを生成
+        const arrayContent = directionList.join(', ');
+        const fullCode = `Direction_t direction_sequence[] = {${arrayContent}};`;
         setCode(fullCode);
     }
   }, []);
 
-  // take_offブロックがワークスペースに追加されたかを検出し、自動でAPIへ書き込む
-  const detectAndWriteTakeOff = useCallback(async () => {
-    if (!workspace.current) return;
-
-    // take_offブロックが一つでも存在するかチェック
-    const blocks = workspace.current.getAllBlocks(false);
-    const hasTakeOff = blocks.some(b => b.type === 'take_off');
-
-    if (hasTakeOff) {
-      // ユーザの要望通り、正確に `takeof();` を書き込む
-      const takeoffCode = `// ユーザーが生成したプログラム\nvoid user_loop() {\n  takeof();\n}`;
-
-      try {
-        const response = await fetch('/api/write-file', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: takeoffCode, filename: TARGET_FILENAME }),
-        });
-
-        const respJson = await response.json().catch(() => ({}));
-        if (response.ok) {
-          // サーバーが返した書き込み先パスを表示
-          setStatus(`✅ takeof() を書き込みました: ${respJson.path || 'パス不明'}`);
-        } else {
-          setStatus(`❌ takeof() 書き込み失敗: ${respJson.message || response.statusText}`);
-        }
-      } catch (error) {
-        console.error('自動書き込みエラー:', error);
-        setStatus('❌ 自動書き込み中にエラーが発生しました');
-      }
-    }
-  }, []);
-
-  // APIルートにコードを送信し、ローカルファイルに書き込む処理
+  // APIルートにコードを送信し、direction_sequence[] の行だけを書き換える処理
   const writeCodeToFile = async () => {
     setStatus('ファイルを書き込み中...');
     try {
+      // まず現在のファイルを読み取る
+      const readResponse = await fetch(`/api/read-file?filename=${TARGET_FILENAME}`);
+      let fileContent = '';
+      
+      if (readResponse.ok) {
+        const readJson = await readResponse.json();
+        fileContent = readJson.content || '';
+      } else {
+        // ファイルが存在しない場合はデフォルトのテンプレートを使う
+        fileContent = `#include <cstdint>
+
+typedef enum {
+    FORWARD,
+    RIGHT,
+    LEFT,
+    BACK,
+    NORMAL,
+    FLIP,
+} Direction_t;
+
+Direction_t direction_sequence[] = {};
+
+uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[0]);
+`;
+      }
+
+      // direction_sequence[] の行を置換
+      const regex = /Direction_t\s+direction_sequence\[\]\s*=\s*\{[^}]*\};/;
+      const newContent = fileContent.replace(regex, code);
+
+      // 書き込み
       const response = await fetch('/api/write-file', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: code, filename: TARGET_FILENAME }),
+        body: JSON.stringify({ code: newContent, filename: TARGET_FILENAME }),
       });
 
       const respJson = await response.json().catch(() => ({}));
       if (response.ok) {
         setStatus(`✅ 書き込み成功！保存先: ${respJson.path || '不明'}`);
-        alert(`コードがローカルのファイルに保存されました: ${respJson.path || TARGET_FILENAME}\nターミナルでPlatformIOコマンドを実行してください。`);
+        alert(`direction_sequence[] が更新されました: ${respJson.path || TARGET_FILENAME}\nターミナルでPlatformIOコマンドを実行してください。`);
       } else {
         setStatus(`❌ 書き込み失敗: ${respJson.message || response.statusText}`);
       }
@@ -248,17 +244,6 @@ ${codeString}}`;
 
       // ワークスペース変更時にコードを更新するリスナー
       workspace.current.addChangeListener(updateCode);
-
-      // take_off 検出用リスナー。簡易デバウンスのためにフラグを使う
-      let pendingTakeoffCheck = false;
-      workspace.current.addChangeListener(() => {
-        if (pendingTakeoffCheck) return;
-        pendingTakeoffCheck = true;
-        setTimeout(async () => {
-          await detectAndWriteTakeOff();
-          pendingTakeoffCheck = false;
-        }, 250); // 250ms の遅延で連続検出を防ぐ
-      });
       
       // 初期状態のコードを生成
       updateCode();
@@ -274,7 +259,7 @@ ${codeString}}`;
             workspace.current = null;
         }
     };
-  }, [updateCode, detectAndWriteTakeOff]); // updateCodeとdetectAndWriteTakeOffが変更されたときのみ再実行
+  }, [updateCode]); // updateCodeが変更されたときのみ再実行
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100%' }}>

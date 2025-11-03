@@ -46,6 +46,8 @@
 #include "button.hpp"
 #include "buzzer.h"
 
+#include <direction_sequence.hpp>
+
 // モータPWM出力Pinのアサイン
 // Motor PWM Pin
 const int pwmFrontLeft  = 5;
@@ -215,24 +217,15 @@ uint8_t last_ahrs_reset_flag = 0;
 bool forward_mode_flag = false;
 uint32_t forward_mode_counter = 0;
 
-typedef enum {
-    FORWARD,
-    RIGHT,
-    LEFT,
-    BACK,
-    NORMAL,
-    FLIP,
-} Direction_t;
-
 Direction_t direction = NORMAL;
 uint32_t direction_counter = 0;
 uint8_t direction_changed_times = 0;
 
 bool takeoff_completed = false;
 
-Direction_t direction_sequence[] = {FORWARD, BACK, FORWARD, BACK, FORWARD, BACK};
+// Direction_t direction_sequence[] = {FORWARD, BACK, FORWARD, BACK, FORWARD, BACK};
 
-uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[0]);
+// uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[0]);
 
 // Function declaration
 void init_pwm();
