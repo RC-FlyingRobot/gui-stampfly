@@ -1,36 +1,284 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚁 StampFly GUI - ドローンプログラミングツール
 
-## Getting Started
+M5StampFlyドローンをビジュアルプログラミング（Blockly）で簡単にプログラムできるWebアプリケーションです。
 
-First, run the development server:
+## 📖 目次
+
+- [プロジェクト概要](#プロジェクト概要)
+- [システム構成と処理の流れ](#システム構成と処理の流れ)
+- [必要な環境](#必要な環境)
+- [セットアップ方法](#セットアップ方法)
+- [使い方](#使い方)
+- [ファームウェアへの書き込み](#ファームウェアへの書き込み)
+- [トラブルシューティング](#トラブルシューティング)
+
+## プロジェクト概要
+
+このプロジェクトは、M5StampFlyドローンを初心者でも簡単にプログラミングできるようにするためのWebベースのGUIツールです。
+
+### 主な機能
+
+- 🧩 **ビジュアルプログラミング**: Blocklyを使った直感的なブロック型プログラミング
+- 🎮 **リアルタイムシミュレーター**: ブラウザ上でドローンの動きを確認
+- 💾 **自動コード生成**: ブロックからC++コードを自動生成し、ファームウェアに書き込み
+- 🔧 **簡単デプロイ**: Next.jsベースで、ローカルまたはクラウドで動作
+
+## システム構成と処理の流れ
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Webブラウザ                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  Blocklyエディタ (ビジュアルプログラミング)          │   │
+│  │  - 離陸、着陸、前進、後退、左右移動、回転ブロック    │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                        ↓                                      │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  ドローンシミュレーター                               │   │
+│  │  - ブロックの動きをリアルタイムで視覚的に確認        │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                        ↓                                      │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  コード生成エンジン                                   │   │
+│  │  - ブロック → Direction_t配列に変換                  │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ APIコール
+┌─────────────────────────────────────────────────────────────┐
+│              Next.js サーバー (Node.js)                      │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  /api/write-file                                      │   │
+│  │  - direction_sequence.hppファイルへ書き込み          │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                        ↓                                      │
+│  firmware/M5Stampfly/src/direction_sequence.hpp              │
+│  - ドローンの動作シーケンスを定義                            │
+└─────────────────────────────────────────────────────────────┘
+                         ↓ PlatformIOでビルド＆書き込み
+┌─────────────────────────────────────────────────────────────┐
+│              M5StampFly ドローン (実機)                      │
+│  - ファームウェアを読み込んで動作を実行                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 処理の流れ
+
+1. **ブロックの配置**: ユーザーがWebブラウザ上のBlocklyエディタでブロックを配置
+2. **シミュレーション**: ドローンシミュレーターで動きを確認
+3. **コード生成**: ブロックから`Direction_t direction_sequence[]`配列を自動生成
+4. **ファイル書き込み**: 「コードをファイルに書き込む」ボタンで`firmware/M5Stampfly/src/direction_sequence.hpp`に保存
+5. **ファームウェアビルド**: PlatformIOでファームウェアをビルド
+6. **ドローンへ書き込み**: USB接続されたM5StampFlyにファームウェアをアップロード
+7. **実行**: ドローンが電源ONで自動的にプログラムを実行
+
+## 必要な環境
+
+### Webアプリケーション側
+
+- **Node.js**: v20以上推奨
+- **npm**: v9以上（Node.jsに付属）
+- **Webブラウザ**: Chrome, Firefox, Safari, Edgeなどのモダンブラウザ
+
+### ファームウェア開発側（ドローンへの書き込み）
+
+- **PlatformIO**: ファームウェアのビルドとアップロードに必要
+  - VS Codeの拡張機能、またはCLI版
+- **USB接続**: M5StampFlyとPCを接続するためのUSBケーブル
+
+## セットアップ方法
+
+### 1. リポジトリのクローン
+
+```bash
+git clone https://github.com/RC-FlyingRobot/gui-stampfly.git
+cd gui-stampfly
+```
+
+### 2. 依存パッケージのインストール
+
+```bash
+npm install
+```
+
+### 3. 開発サーバーの起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+成功すると、以下のメッセージが表示されます：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+  ▲ Next.js 15.5.4
+  - Local:        http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. ブラウザでアクセス
 
-## Learn More
+ブラウザで [http://localhost:3000](http://localhost:3000) を開いてください。
 
-To learn more about Next.js, take a look at the following resources:
+## 使い方
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### ステップ1: ドローンをプログラミング
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **ブロックを選ぶ**: 画面左側のツールボックスから使いたいブロックを選択
+   - **基本動作**: 離陸🚀、着陸⬇️
+   - **移動と制御**: 前⬆️、右➡️、左⬅️、後ろ⬇️、回転🔄
 
-## Deploy on Vercel
+2. **ブロックを配置**: ブロックをドラッグ＆ドロップして、実行したい順番に並べる
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **シミュレーションで確認**: 画面右側の「▶️ シミュレーション開始」ボタンをクリックして動きを確認
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### ステップ2: コードをファイルに保存
+
+1. **書き込みボタン**: 画面右下の「💾 コードをファイルに書き込む」ボタンをクリック
+2. **確認**: 「書き込み成功！」メッセージが表示されればOK
+3. **ファイルの場所**: `firmware/M5Stampfly/src/direction_sequence.hpp` に保存されます
+
+### ステップ3: シミュレーターで動作確認
+
+- **シミュレーション開始**: ▶️ボタンでドローンの動きをアニメーションで確認
+- **停止**: ⏹️ボタンでシミュレーションを中断
+- **グリッド表示**: 11x11のグリッド上でドローンの位置と状態を表示
+  - 🚁: ドローンの現在位置
+  - オレンジ色: 地上
+  - 緑色: 飛行中
+
+## ファームウェアへの書き込み
+
+### 準備
+
+1. **PlatformIOのインストール**
+   - VS Codeを使用する場合: [PlatformIO IDE拡張機能](https://platformio.org/install/ide?install=vscode)をインストール
+   - CLIを使用する場合: [PlatformIO Core (CLI)](https://docs.platformio.org/en/latest/core/installation/index.html)をインストール
+
+2. **M5StampFlyの接続**
+   - USBケーブルでPCとM5StampFlyを接続
+
+### VS Codeを使う場合
+
+1. VS Codeで `firmware/M5Stampfly/` フォルダを開く
+2. PlatformIOのサイドバーから「Build」をクリックしてビルド
+3. 「Upload」をクリックしてM5StampFlyに書き込み
+
+### コマンドラインを使う場合
+
+```bash
+cd firmware/M5Stampfly
+pio run --target upload
+```
+
+### 実行
+
+1. M5StampFlyの電源を入れる（またはリセット）
+2. ドローンがプログラムされた動作を自動実行します
+
+## トラブルシューティング
+
+### Webアプリケーションが起動しない
+
+**症状**: `npm run dev` でエラーが出る
+
+**解決方法**:
+```bash
+# Node.jsのバージョン確認
+node --version  # v20以上推奨
+
+# 依存関係の再インストール（推奨）
+npm ci
+
+# または、node_modulesを削除して再インストール
+# 注意: rm -rf は不可逆的な操作です。実行前に現在のディレクトリを確認してください
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### コードの書き込みが失敗する
+
+**症状**: 「書き込み失敗」というエラーメッセージが表示される
+
+**解決方法**:
+- `firmware/M5Stampfly/src/` ディレクトリが存在するか確認
+- ファイルの書き込み権限があるか確認
+- Webアプリケーションを再起動してみる
+
+### PlatformIOでビルドエラーが出る
+
+**症状**: `pio run` でコンパイルエラー
+
+**解決方法**:
+```bash
+# ライブラリの再インストール
+cd firmware/M5Stampfly
+pio pkg install
+
+# クリーンビルド
+pio run --target clean
+pio run
+```
+
+### M5StampFlyへの書き込みができない
+
+**症状**: `pio run --target upload` でエラー
+
+**解決方法**:
+- USBケーブルが正しく接続されているか確認
+- デバイスドライバがインストールされているか確認
+- 別のUSBポートを試す
+- シリアルポートの権限を確認（Linuxの場合）:
+  ```bash
+  # 現在のユーザーをdialoutグループに追加（シリアルポートへのアクセス権を付与）
+  # 注意: このコマンドはシステムの権限設定を変更します
+  sudo usermod -a -G dialout $USER
+  # 変更を反映するには再ログインまたは再起動が必要です
+  ```
+
+## プロジェクト構造
+
+```
+gui-stampfly/
+├── src/
+│   ├── app/                    # Next.jsアプリケーション
+│   │   ├── page.jsx           # メインページ
+│   │   └── api/               # APIルート
+│   │       ├── read-file/     # ファイル読み込みAPI
+│   │       └── write-file/    # ファイル書き込みAPI
+│   └── components/
+│       ├── StampFlyBlockly.js  # Blocklyエディタコンポーネント
+│       └── DroneSimulator.js   # シミュレーターコンポーネント
+├── firmware/
+│   └── M5Stampfly/             # ファームウェアプロジェクト
+│       ├── src/
+│       │   └── direction_sequence.hpp  # 生成されるコードファイル
+│       └── platformio.ini      # PlatformIO設定
+├── package.json                # Node.js依存関係
+└── README.md                   # このファイル
+```
+
+## 開発について
+
+### ビルド
+
+```bash
+npm run build
+```
+
+### Lintチェック
+
+```bash
+npm run lint
+```
+
+## ベースプロジェクト
+
+このプロジェクトは [Next.js](https://nextjs.org) をベースに作成されています。
+
+ファームウェアは [M5Fly-kanazawa/StampFly2024June](https://github.com/M5Fly-kanazawa/StampFly2024June) をベースにしています。
+
+## 製品情報
+
+- [M5StampFly公式ドキュメント](https://docs.m5stack.com/en/app/Stamp%20Fly)
+
+## ライセンス
+
+このプロジェクトのライセンスについては、LICENSEファイルを参照してください。
