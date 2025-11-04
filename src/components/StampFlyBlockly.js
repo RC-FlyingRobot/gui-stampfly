@@ -9,71 +9,71 @@ const defineStampFlyBlocks = () => {
   // --- 1-1. ブロックの見た目と動作を定義 ---
   Blockly.Blocks['take_off'] = {
     init: function() {
-      this.appendDummyInput().appendField("離陸 🚀");
+      this.appendDummyInput().appendField("りりく 🚀");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(160);
-      this.setTooltip("ドローンを安定した高さまで上昇させます。");
+      this.setTooltip("ドローンを安ていした高さまで上しょうさせます。");
     }
   };
 
   Blockly.Blocks['land'] = {
     init: function() {
-      this.appendDummyInput().appendField("着陸 ⬇️");
+      this.appendDummyInput().appendField("ちゃくりく ⬇️");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(160);
-      this.setTooltip("ドローンを優しく着陸させます。");
+      this.setTooltip("ドローンをやさしくちゃくりくさせます。");
     }
   };
 
   Blockly.Blocks['forward_1s'] = {
     init: function() {
-      this.appendDummyInput().appendField("前 １秒 ⬆️");
+      this.appendDummyInput().appendField("前 １びょう ⬆️");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(20);
-      this.setTooltip("ドローンを前方に1秒間移動させます。");
+      this.setTooltip("ドローンを前にむかって1びょうかんうごかします。");
     }
   };
 
   Blockly.Blocks['right_1s'] = {
     init: function() {
-      this.appendDummyInput().appendField("右 １秒 ➡️");
+      this.appendDummyInput().appendField("右 １びょう ➡️");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(20);
-      this.setTooltip("ドローンを右方向に1秒間移動させます。");
+      this.setTooltip("ドローンを右にむかって1びょうかんうごかします。");
     }
   };
 
   Blockly.Blocks['left_1s'] = {
     init: function() {
-      this.appendDummyInput().appendField("左 １秒 ⬅️");
+      this.appendDummyInput().appendField("左 １びょう ⬅️");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(20);
-      this.setTooltip("ドローンを左方向に1秒間移動させます。");
+      this.setTooltip("ドローンを左にむかって1びょうかんうごかします。");
     }
   };
 
   Blockly.Blocks['back_1s'] = {
     init: function() {
-      this.appendDummyInput().appendField("後ろ １秒 ⬇️");
+      this.appendDummyInput().appendField("うしろ １びょう ⬇️");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(20);
-      this.setTooltip("ドローンを後方に1秒間移動させます。");
+      this.setTooltip("ドローンをうしろにむかって1びょうかんうごかします。");
     }
   };
 
   Blockly.Blocks['rotate'] = {
     init: function() {
-      this.appendDummyInput().appendField("回転 🔄");
+      this.appendDummyInput().appendField("かいてん 🔄");
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(20);
-      this.setTooltip("ドローンを回転させます。");
+      this.setTooltip("ドローンをかいてんさせます。");
     }
   };
 
@@ -111,11 +111,11 @@ const defineStampFlyBlocks = () => {
 // --- 2. ツールボックスXMLの定義（Palette） ---
 const toolboxXml = `
 <xml id="toolbox" style="display: none">
-    <category name="基本動作" colour="160">
+    <category name="きほんどうさ" colour="160">
         <block type="take_off"></block>
         <block type="land"></block>
     </category>
-    <category name="移動と制御" colour="20">
+    <category name="いどうとせいぎょ" colour="20">
         <block type="forward_1s"></block>
         <block type="right_1s"></block>
         <block type="left_1s"></block>
@@ -136,7 +136,7 @@ const StampFlyBlockly = () => {
   const blocklyDiv = useRef(null); 
   const workspace = useRef(null); 
   const [code, setCode] = useState('');
-  const [status, setStatus] = useState('待機中...');
+  const [status, setStatus] = useState('たいきちゅう...');
   const [isLoading, setIsLoading] = useState(false);
   // 書き込み先のデフォルトファイル名（BASE_DIR 以下の相対パス）
   const TARGET_FILENAME = 'M5Stampfly/src/direction_sequence.hpp';
@@ -184,7 +184,7 @@ const StampFlyBlockly = () => {
   // APIルートにコードを送信し、direction_sequence[] の行だけを書き換える処理
   const writeCodeToFile = async () => {
     setIsLoading(true);
-    setStatus('ファイルを書き込み中...');
+    setStatus('ファイルをかきこみちゅう...');
     try {
       // まず現在のファイルを読み取る
       const readResponse = await fetch(`/api/read-file?filename=${TARGET_FILENAME}`);
@@ -225,14 +225,14 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
 
       const respJson = await response.json().catch(() => ({}));
       if (response.ok) {
-        setStatus(`✅ 書き込み成功！保存先: ${respJson.path || '不明'}`);
-        alert(`direction_sequence[] が更新されました: ${respJson.path || TARGET_FILENAME}\nターミナルでPlatformIOコマンドを実行してください。`);
+        setStatus(`✅ かきこみせいこう！ほぞんさき: ${respJson.path || 'ふめい'}`);
+        alert(`direction_sequence[] がこうしんされました: ${respJson.path || TARGET_FILENAME}\nターミナルでPlatformIOコマンドをじっこうしてください。`);
       } else {
-        setStatus(`❌ 書き込み失敗: ${respJson.message || response.statusText}`);
+        setStatus(`❌ かきこみしっぱい: ${respJson.message || response.statusText}`);
       }
     } catch (error) {
       console.error('API通信エラー:', error);
-      setStatus('❌ サーバーエラーが発生しました。');
+      setStatus('❌ サーバーエラーがはっせいしました。');
     } finally {
       setIsLoading(false);
     }
@@ -319,7 +319,7 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
               fontWeight: 'bold'
             }}
           >
-            💾 コードをファイルに書き込む
+            💾 コードをファイルにかきこむ
           </button>
           <p style={{ marginTop: '8px', fontWeight: 'bold', textAlign: 'center', fontSize: '0.9em', margin: '8px 0 0 0' }}>
             ステータス: {status}

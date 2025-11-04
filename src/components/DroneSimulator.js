@@ -8,7 +8,7 @@ const DroneSimulator = ({ workspace }) => {
     rotation: 0,
     isFlipping: false,
     isMoving: false,
-    currentAction: '待機中'
+    currentAction: 'たいきちゅう'
   });
   
   const [isSimulating, setIsSimulating] = useState(false);
@@ -36,7 +36,7 @@ const DroneSimulator = ({ workspace }) => {
   const runSimulation = async () => {
     const actions = generateActionSequence();
     if (actions.length === 0) {
-      alert('ブロックを配置してください！');
+      alert('ブロックをならべてください！');
       return;
     }
 
@@ -50,7 +50,7 @@ const DroneSimulator = ({ workspace }) => {
       rotation: 0,
       isFlipping: false,
       isMoving: false,
-      currentAction: '開始'
+      currentAction: 'かいし'
     });
 
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -61,7 +61,7 @@ const DroneSimulator = ({ workspace }) => {
       await new Promise(resolve => setTimeout(resolve, simulationSpeed));
     }
 
-    setDroneState(prev => ({ ...prev, currentAction: '完了！', isMoving: false }));
+    setDroneState(prev => ({ ...prev, currentAction: 'かんりょう！', isMoving: false }));
     setIsSimulating(false);
   };
 
@@ -73,37 +73,37 @@ const DroneSimulator = ({ workspace }) => {
       switch (actionType) {
         case 'take_off':
           newState.altitude = 1;
-          newState.currentAction = '🚀 離陸中';
+          newState.currentAction = '🚀 りりくちゅう';
           break;
         case 'land':
           newState.altitude = 0;
-          newState.currentAction = '⬇️ 着陸中';
+          newState.currentAction = '⬇️ ちゃくりくちゅう';
           break;
         case 'forward_1s':
           newState.y = Math.max(0, prev.y - 1);
-          newState.currentAction = '⬆️ 前進中';
+          newState.currentAction = '⬆️ ぜんしんちゅう';
           break;
         case 'back_1s':
           newState.y = Math.min(10, prev.y + 1);
-          newState.currentAction = '⬇️ 後退中';
+          newState.currentAction = '⬇️ こうたいちゅう';
           break;
         case 'left_1s':
           newState.x = Math.max(0, prev.x - 1);
-          newState.currentAction = '⬅️ 左移動中';
+          newState.currentAction = '⬅️ ひだりいどうちゅう';
           break;
         case 'right_1s':
           newState.x = Math.min(10, prev.x + 1);
-          newState.currentAction = '➡️ 右移動中';
+          newState.currentAction = '➡️ みぎいどうちゅう';
           break;
         case 'rotate':
           newState.isFlipping = true;
-          newState.currentAction = '🔄 回転中';
+          newState.currentAction = '🔄 かいてんちゅう';
           setTimeout(() => {
             setDroneState(s => ({ ...s, isFlipping: false }));
           }, 500);
           break;
         default:
-          newState.currentAction = '不明な動作';
+          newState.currentAction = 'ふめいなどうさ';
       }
 
       return newState;
@@ -113,7 +113,7 @@ const DroneSimulator = ({ workspace }) => {
   // 停止ボタン
   const stopSimulation = () => {
     setIsSimulating(false);
-    setDroneState(prev => ({ ...prev, currentAction: '停止', isMoving: false }));
+    setDroneState(prev => ({ ...prev, currentAction: 'ていし', isMoving: false }));
   };
 
   return (
@@ -135,7 +135,7 @@ const DroneSimulator = ({ workspace }) => {
             cursor: isSimulating ? 'not-allowed' : 'pointer'
           }}
         >
-          ▶️ シミュレーション開始
+          ▶️ シミュレーションかいし
         </button>
         <button 
           onClick={stopSimulation}
@@ -149,7 +149,7 @@ const DroneSimulator = ({ workspace }) => {
             cursor: !isSimulating ? 'not-allowed' : 'pointer'
           }}
         >
-          ⏹️ 停止
+          ⏹️ ていし
         </button>
       </div>
 
@@ -163,10 +163,10 @@ const DroneSimulator = ({ workspace }) => {
         borderRadius: '5px'
       }}>
         <div>
-          <strong>現在の動作:</strong> {droneState.currentAction}
+          <strong>いまのうごき:</strong> {droneState.currentAction}
         </div>
         <div>
-          <strong>高度:</strong> {droneState.altitude === 0 ? '地上 🟤' : '飛行中 🟦'}
+          <strong>高さ:</strong> {droneState.altitude === 0 ? 'ちじょう 🟤' : 'ひこうちゅう 🟦'}
         </div>
       </div>
 
