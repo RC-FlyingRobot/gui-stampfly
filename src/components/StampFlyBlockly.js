@@ -329,7 +329,7 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
 
         .blockly-workspace {
           flex: 1;
-          min-width: 400px;
+          min-width: 300px;
           border: 1px solid #ddd;
         }
 

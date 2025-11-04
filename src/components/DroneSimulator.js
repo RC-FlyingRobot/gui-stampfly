@@ -265,14 +265,14 @@ const DroneSimulator = ({ workspace }) => {
           }
 
           .grid-container {
-            gridTemplateColumns: repeat(11, min(30px, 8vw));
-            gridTemplateRows: repeat(11, min(30px, 8vw));
+            gridTemplateColumns: repeat(11, min(30px, 8vmin));
+            gridTemplateRows: repeat(11, min(30px, 8vmin));
             gap: 1px;
             padding: 3px;
           }
 
           .grid-cell {
-            font-size: min(18px, 5vw);
+            font-size: min(18px, 5vmin);
           }
         }
       `}</style>
