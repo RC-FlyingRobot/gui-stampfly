@@ -130,12 +130,14 @@ defineStampFlyBlocks();
 
 // --- 3. Reactコンポーネント本体 ---
 import DroneSimulator from './DroneSimulator';
+import LoadingModal from './LoadingModal';
 
 const StampFlyBlockly = () => {
   const blocklyDiv = useRef(null); 
   const workspace = useRef(null); 
   const [code, setCode] = useState('');
   const [status, setStatus] = useState('待機中...');
+  const [isLoading, setIsLoading] = useState(false);
   // 書き込み先のデフォルトファイル名（BASE_DIR 以下の相対パス）
   const TARGET_FILENAME = 'M5Stampfly/src/direction_sequence.hpp';
   
@@ -181,6 +183,7 @@ const StampFlyBlockly = () => {
 
   // APIルートにコードを送信し、direction_sequence[] の行だけを書き換える処理
   const writeCodeToFile = async () => {
+    setIsLoading(true);
     setStatus('ファイルを書き込み中...');
     try {
       // まず現在のファイルを読み取る
@@ -230,6 +233,8 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
     } catch (error) {
       console.error('API通信エラー:', error);
       setStatus('❌ サーバーエラーが発生しました。');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -263,6 +268,9 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
+      {/* Loading Modal */}
+      <LoadingModal isLoading={isLoading} message="書き込み中..." />
+      
       {/* 左側: Blocklyワークスペース */}
       <div ref={blocklyDiv} style={{ flex: '1', minWidth: '400px', border: '1px solid #ddd' }} />
       
