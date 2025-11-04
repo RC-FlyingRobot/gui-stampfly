@@ -1,5 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 // セキュアなベースディレクトリ: リポジトリ内の `firmware` フォルダを想定
 // クライアントからは相対パス (例: "M5Stampfly/src/flight_control.cpp") を渡してください。
@@ -39,7 +43,59 @@ export async function POST(req) {
 
     fs.writeFileSync(targetPath, code, 'utf-8');
     console.log(`[API] Code written to: ${targetPath}`);
-    return new Response(JSON.stringify({ message: 'ファイルが正常に書き込まれました。', path: targetPath, baseDir: resolvedBase }), { status: 200 });
+
+    // ファイル書き込み後にpio run --target uploadを実行
+    try {
+      // プロジェクトディレクトリ（platformio.iniがあるディレクトリ）を特定
+      const projectDir = path.dirname(targetPath);
+      let pioDir = projectDir;
+      
+      // platformio.iniを探して上位ディレクトリを辿る
+      while (pioDir.startsWith(resolvedBase)) {
+        const pioIniPath = path.join(pioDir, 'platformio.ini');
+        if (fs.existsSync(pioIniPath)) {
+          break;
+        }
+        const parentDir = path.dirname(pioDir);
+        if (parentDir === pioDir) break; // ルートに到達
+        pioDir = parentDir;
+      }
+
+      console.log(`[API] Running pio run --target upload in: ${pioDir}`);
+      const { stdout, stderr } = await execAsync('pio run --target upload', {
+        cwd: pioDir,
+        timeout: 120000, // 2分のタイムアウト
+      });
+
+      console.log('[API] PIO Upload stdout:', stdout);
+      if (stderr) {
+        console.warn('[API] PIO Upload stderr:', stderr);
+      }
+
+      return new Response(
+        JSON.stringify({
+          message: 'ファイルが正常に書き込まれ、アップロードが完了しました。',
+          path: targetPath,
+          baseDir: resolvedBase,
+          uploadOutput: stdout,
+          uploadError: stderr || null,
+        }),
+        { status: 200 }
+      );
+    } catch (uploadError) {
+      console.error('[API Error] PIO upload failed:', uploadError);
+      return new Response(
+        JSON.stringify({
+          message: 'ファイルは書き込まれましたが、アップロードに失敗しました。',
+          path: targetPath,
+          baseDir: resolvedBase,
+          uploadError: uploadError?.message,
+          uploadStdout: uploadError?.stdout || null,
+          uploadStderr: uploadError?.stderr || null,
+        }),
+        { status: 207 } // Multi-Status: 部分的成功
+      );
+    }
   } catch (error) {
     console.error('[API Error] File writing failed:', error);
     return new Response(
