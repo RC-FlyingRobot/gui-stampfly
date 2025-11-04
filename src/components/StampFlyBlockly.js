@@ -13,7 +13,7 @@ const defineStampFlyBlocks = () => {
       this.setPreviousStatement(true, null);
       this.setNextStatement(true, null);
       this.setColour(160);
-      this.setTooltip("ドローンを安ていした高さまで上しょうさせます。");
+      this.setTooltip("ドローンをあんていした高さまでじょうしょうさせます。");
     }
   };
 
