@@ -184,7 +184,11 @@ pio run --target upload
 # Node.jsのバージョン確認
 node --version  # v20以上推奨
 
-# 依存関係の再インストール
+# 依存関係の再インストール（推奨）
+npm ci
+
+# または、node_modulesを削除して再インストール
+# 注意: rm -rf は不可逆的な操作です。実行前に現在のディレクトリを確認してください
 rm -rf node_modules package-lock.json
 npm install
 ```
@@ -223,8 +227,10 @@ pio run
 - 別のUSBポートを試す
 - シリアルポートの権限を確認（Linuxの場合）:
   ```bash
+  # 現在のユーザーをdialoutグループに追加（シリアルポートへのアクセス権を付与）
+  # 注意: このコマンドはシステムの権限設定を変更します
   sudo usermod -a -G dialout $USER
-  # 再ログインが必要
+  # 変更を反映するには再ログインまたは再起動が必要です
   ```
 
 ## プロジェクト構造
