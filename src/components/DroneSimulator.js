@@ -117,51 +117,29 @@ const DroneSimulator = ({ workspace }) => {
   };
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f0f0f0', borderTop: '2px solid #ccc' }}>
+    <div className="simulator-container">
       <h3>🎮 ドローンシミュレーター</h3>
       
       {/* コントロール */}
-      <div style={{ marginBottom: '15px' }}>
+      <div className="controls">
         <button 
           onClick={runSimulation} 
           disabled={isSimulating}
-          style={{ 
-            padding: '10px 20px', 
-            marginRight: '10px',
-            backgroundColor: isSimulating ? '#ccc' : '#2196F3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: isSimulating ? 'not-allowed' : 'pointer'
-          }}
+          className={`control-button ${isSimulating ? 'disabled' : 'start'}`}
         >
           ▶️ シミュレーション開始
         </button>
         <button 
           onClick={stopSimulation}
           disabled={!isSimulating}
-          style={{ 
-            padding: '10px 20px',
-            backgroundColor: !isSimulating ? '#ccc' : '#f44336',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: !isSimulating ? 'not-allowed' : 'pointer'
-          }}
+          className={`control-button ${!isSimulating ? 'disabled' : 'stop'}`}
         >
           ⏹️ 停止
         </button>
       </div>
 
       {/* ステータス表示 */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '20px', 
-        marginBottom: '15px',
-        padding: '10px',
-        backgroundColor: 'white',
-        borderRadius: '5px'
-      }}>
+      <div className="status-display">
         <div>
           <strong>現在の動作:</strong> {droneState.currentAction}
         </div>
@@ -171,15 +149,7 @@ const DroneSimulator = ({ workspace }) => {
       </div>
 
       {/* グリッド表示 */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(11, 40px)',
-        gridTemplateRows: 'repeat(11, 40px)',
-        gap: '2px',
-        backgroundColor: '#ddd',
-        padding: '5px',
-        borderRadius: '5px'
-      }}>
+      <div className="grid-container">
         {Array.from({ length: 121 }).map((_, idx) => {
           const x = idx % 11;
           const y = Math.floor(idx / 11);
@@ -188,17 +158,12 @@ const DroneSimulator = ({ workspace }) => {
           return (
             <div
               key={idx}
+              className={`grid-cell ${isDrone ? 'drone-cell' : ''}`}
               style={{
                 backgroundColor: isDrone 
                   ? (droneState.altitude === 0 ? '#ff9800' : '#4CAF50')
                   : 'white',
-                border: '1px solid #ccc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
                 transform: isDrone ? `rotate(${droneState.rotation}deg)` : 'none',
-                transition: 'all 0.3s ease',
                 animation: droneState.isFlipping && isDrone ? 'flip 0.5s' : 'none'
               }}
             >
@@ -209,9 +174,106 @@ const DroneSimulator = ({ workspace }) => {
       </div>
 
       <style jsx>{`
+        .simulator-container {
+          padding: 20px;
+          background-color: #f0f0f0;
+          border-top: 2px solid #ccc;
+        }
+
+        .controls {
+          margin-bottom: 15px;
+        }
+
+        .control-button {
+          padding: 10px 20px;
+          margin-right: 10px;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+        }
+
+        .control-button.start {
+          background-color: #2196F3;
+        }
+
+        .control-button.stop {
+          background-color: #f44336;
+        }
+
+        .control-button.disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+
+        .status-display {
+          display: flex;
+          gap: 20px;
+          margin-bottom: 15px;
+          padding: 10px;
+          background-color: white;
+          border-radius: 5px;
+        }
+
+        .grid-container {
+          display: grid;
+          gridTemplateColumns: repeat(11, 40px);
+          gridTemplateRows: repeat(11, 40px);
+          gap: 2px;
+          background-color: #ddd;
+          padding: 5px;
+          border-radius: 5px;
+          justify-content: center;
+        }
+
+        .grid-cell {
+          border: 1px solid #ccc;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          transition: all 0.3s ease;
+        }
+
         @keyframes flip {
           0%, 100% { transform: rotate(${droneState.rotation}deg) rotateY(0deg); }
           50% { transform: rotate(${droneState.rotation}deg) rotateY(180deg); }
+        }
+
+        /* モバイル対応 */
+        @media (max-width: 768px) {
+          .simulator-container {
+            padding: 10px;
+          }
+
+          .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .control-button {
+            margin-right: 0;
+            width: 100%;
+            padding: 12px;
+          }
+
+          .status-display {
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.9em;
+          }
+
+          .grid-container {
+            gridTemplateColumns: repeat(11, min(30px, 8vw));
+            gridTemplateRows: repeat(11, min(30px, 8vw));
+            gap: 1px;
+            padding: 3px;
+          }
+
+          .grid-cell {
+            font-size: min(18px, 5vw);
+          }
         }
       `}</style>
     </div>

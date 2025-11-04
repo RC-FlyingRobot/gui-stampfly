@@ -267,22 +267,15 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
   }, [updateCode]); // updateCodeが変更されたときのみ再実行
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
+    <div className="stampfly-container">
       {/* Loading Modal */}
       <LoadingModal isLoading={isLoading} message="書き込み中..." />
       
-      {/* 左側: Blocklyワークスペース */}
-      <div ref={blocklyDiv} style={{ flex: '1', minWidth: '400px', border: '1px solid #ddd' }} />
+      {/* 上側/左側: Blocklyワークスペース */}
+      <div ref={blocklyDiv} className="blockly-workspace" />
       
-      {/* 右側: コード、シミュレーター、ボタン */}
-      <div style={{ 
-        flex: '1', 
-        display: 'flex', 
-        flexDirection: 'column',
-        backgroundColor: '#f9f9f9', 
-        borderLeft: '1px solid #ccc',
-        overflow: 'hidden'
-      }}>
+      {/* 下側/右側: コード、シミュレーター、ボタン */}
+      <div className="simulator-panel">
         {/* コード表示エリア */}
         {/* <div style={{ padding: '15px', borderBottom: '1px solid #ddd', flexShrink: 0 }}>
           <h3 style={{ margin: '0 0 10px 0', fontSize: '1em' }}>📝 生成された C++ コード</h3>
@@ -303,8 +296,8 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
           <DroneSimulator workspace={workspace.current} />
         </div>
 
-        {/* 書き込みボタンエリア */}
-        <div style={{ padding: '15px', flexShrink: 0 }}>
+        {/* 書き込みボタンエリア（モバイルでは非表示） */}
+        <div className="write-button-area">
           <button 
             onClick={writeCodeToFile} 
             style={{ 
@@ -326,6 +319,59 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        .stampfly-container {
+          display: flex;
+          height: 100vh;
+          width: 100%;
+        }
+
+        .blockly-workspace {
+          flex: 1;
+          min-width: 400px;
+          border: 1px solid #ddd;
+        }
+
+        .simulator-panel {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          background-color: #f9f9f9;
+          border-left: 1px solid #ccc;
+          overflow: hidden;
+        }
+
+        .write-button-area {
+          padding: 15px;
+          flex-shrink: 0;
+        }
+
+        /* モバイル対応 */
+        @media (max-width: 768px) {
+          .stampfly-container {
+            flex-direction: column;
+          }
+
+          .blockly-workspace {
+            flex: 1;
+            min-width: unset;
+            min-height: 50vh;
+            border: none;
+            border-bottom: 1px solid #ddd;
+          }
+
+          .simulator-panel {
+            flex: 1;
+            border-left: none;
+            border-top: 1px solid #ccc;
+          }
+
+          .write-button-area {
+            display: none;
+          }
+        }
+      `}</style>
     </div>
   );
 };
