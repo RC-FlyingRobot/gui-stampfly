@@ -223,6 +223,11 @@ uint8_t direction_changed_times = 0;
 
 bool takeoff_completed = false;
 
+
+const uint32_t DIRECTION_GOING_TIME = 700;
+const uint32_t DIRECTION_REVERSING_TIME = 800;
+const uint32_t DIRECTION_END_TIME = 1200;
+
 // Direction_t direction_sequence[] = {FORWARD, BACK, FORWARD, BACK, FORWARD, BACK};
 
 // uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[0]);
@@ -696,55 +701,63 @@ void get_command(void) {
         } else {
             switch (direction) {
                 case FORWARD:
-                    if (direction_counter < 300) {
+                    if (direction_counter < DIRECTION_GOING_TIME) {
                         // 加速・巡航フェーズ
-                        Pitch_angle_command = -0.15;
-                    } else if (direction_counter < 400) {
+                        Pitch_angle_command = -0.10;
+                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
                         // 減速フェーズ（逆方向に傾ける）
-                        Pitch_angle_command = 0.10;
-                    } else {
+                        Pitch_angle_command = 0.05;
+                    } else if (direction_counter < DIRECTION_END_TIME){
                         Pitch_angle_command = 0.0;
-                    }
-                    Roll_angle_command = 0.4f * Stick[AILERON];
+                    } else {
+						Pitch_angle_command = 0.0;
+					}
+                    Roll_angle_command = 0.1f * Stick[AILERON];
                     break;
 
                 case BACK:
-                    if (direction_counter < 300) {
-                        Pitch_angle_command = 0.15;
-                    } else if (direction_counter < 400) {
-                        Pitch_angle_command = -0.10;
+                    if (direction_counter < DIRECTION_GOING_TIME) {
+                        Pitch_angle_command = 0.10;
+                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        Pitch_angle_command = -0.05;
+					} else if (direction_counter < DIRECTION_END_TIME){
+						Pitch_angle_command = 0.0;
                     } else {
                         Pitch_angle_command = 0.0;
                     }
-                    Roll_angle_command = 0.4f * Stick[AILERON];
+                    Roll_angle_command = 0.1f * Stick[AILERON];
                     break;
 
                 case RIGHT:
-                    if (direction_counter < 300) {
-                        Roll_angle_command = 0.15;
-                    } else if (direction_counter < 400) {
-                        Roll_angle_command = -0.10;
+                    if (direction_counter < DIRECTION_GOING_TIME) {
+                        Roll_angle_command = 0.10;
+                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        Roll_angle_command = -0.05;
+					} else if (direction_counter < DIRECTION_END_TIME){
+						Roll_angle_command = 0.0;
                     } else {
                         Roll_angle_command = 0.0;
                     }
-                    Pitch_angle_command = 0.4f * Stick[ELEVATOR];
+                    Pitch_angle_command = 0.1f * Stick[ELEVATOR];
                     break;
 
                 case LEFT:
-                    if (direction_counter < 300) {
-                        Roll_angle_command = -0.15;
-                    } else if (direction_counter < 400) {
-                        Roll_angle_command = 0.10;
+                    if (direction_counter < DIRECTION_GOING_TIME) {
+                        Roll_angle_command = -0.10;
+                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        Roll_angle_command = 0.05;
+					} else if (direction_counter < DIRECTION_END_TIME){
+						Roll_angle_command = 0.0;
                     } else {
                         Roll_angle_command = 0.0;
                     }
-                    Pitch_angle_command = 0.4f * Stick[ELEVATOR];
+                    Pitch_angle_command = 0.1f * Stick[ELEVATOR];
                     break;
 
                 case NORMAL:
                 default:
-                    Pitch_angle_command = 0.4f * Stick[ELEVATOR];
-                    Roll_angle_command  = 0.4f * Stick[AILERON];
+                    Pitch_angle_command = 0.1f * Stick[ELEVATOR];
+                    Roll_angle_command  = 0.1f * Stick[AILERON];
                     break;
             }
         }
@@ -756,7 +769,7 @@ void get_command(void) {
 
         if (direction != NORMAL && Mode != FLIP_MODE) {
             direction_counter++;
-            if (direction_counter > 400) {
+            if (direction_counter > DIRECTION_END_TIME) {
                 direction_counter = 0;
                 direction_changed_times++;
                 if (direction_changed_times >= MAX_STATES_NUM) {
@@ -984,16 +997,16 @@ void rate_control(void) {
         // Motor Control
         // 正規化Duty
         FrontRight_motor_duty = Duty_fr.update(
-            (Thrust_command + (-Roll_rate_command + Pitch_rate_command + Yaw_rate_command) * 0.25f) / BATTERY_VOLTAGE,
+            (Thrust_command + (-Roll_rate_command + Pitch_rate_command + Yaw_rate_command) * 0.20f) / BATTERY_VOLTAGE,
             Interval_time);
         FrontLeft_motor_duty = Duty_fl.update(
-            (Thrust_command + (Roll_rate_command + Pitch_rate_command - Yaw_rate_command) * 0.25f) / BATTERY_VOLTAGE,
+            (Thrust_command + (Roll_rate_command + Pitch_rate_command - Yaw_rate_command) * 0.20f) / BATTERY_VOLTAGE,
             Interval_time);
         RearRight_motor_duty = Duty_rr.update(
-            (Thrust_command + (-Roll_rate_command - Pitch_rate_command - Yaw_rate_command) * 0.25f) / BATTERY_VOLTAGE,
+            (Thrust_command + (-Roll_rate_command - Pitch_rate_command - Yaw_rate_command) * 0.20f) / BATTERY_VOLTAGE,
             Interval_time);
         RearLeft_motor_duty = Duty_rl.update(
-            (Thrust_command + (Roll_rate_command - Pitch_rate_command + Yaw_rate_command) * 0.25f) / BATTERY_VOLTAGE,
+            (Thrust_command + (Roll_rate_command - Pitch_rate_command + Yaw_rate_command) * 0.40f) / BATTERY_VOLTAGE,
             Interval_time);
 
         const float minimum_duty = 0.0f;
