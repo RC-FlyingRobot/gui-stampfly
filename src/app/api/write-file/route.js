@@ -5,9 +5,6 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-// セキュアなベースディレクトリ: リポジトリ内の `firmware` フォルダを想定
-// クライアントからは相対パス (例: "M5Stampfly/src/flight_control.cpp") を渡してください。
-// 環境変数で別のベースフォルダを指定したい場合は WRITE_BASE_DIR を設定してください。
 const BASE_DIR = process.env.WRITE_BASE_DIR || path.join(process.cwd(), 'firmware');
 
 export async function POST(req) {
@@ -26,7 +23,6 @@ export async function POST(req) {
       );
     }
 
-    // ベースディレクトリ以下に限定してパス横取りを防止
     const targetPath = path.resolve(BASE_DIR, filename);
     const resolvedBase = path.resolve(BASE_DIR);
 
@@ -35,7 +31,6 @@ export async function POST(req) {
       return new Response(JSON.stringify({ message: '不正なファイルパスです。許可されているディレクトリ内の相対パスを指定してください。' }), { status: 400 });
     }
 
-    // 必要ならディレクトリを作成
     const dir = path.dirname(targetPath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
