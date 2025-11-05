@@ -111,17 +111,13 @@ const defineStampFlyBlocks = () => {
 // --- 2. ツールボックスXMLの定義（Palette） ---
 const toolboxXml = `
 <xml id="toolbox" style="display: none">
-    <category name="きほんどうさ" colour="160">
         <block type="take_off"></block>
         <block type="land"></block>
-    </category>
-    <category name="いどうとせいぎょ" colour="20">
         <block type="forward_1s"></block>
         <block type="right_1s"></block>
         <block type="left_1s"></block>
         <block type="back_1s"></block>
         <block type="rotate"></block>
-    </category>
 </xml>
 `;
 
