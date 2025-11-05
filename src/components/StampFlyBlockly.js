@@ -222,8 +222,8 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
 
       const respJson = await response.json().catch(() => ({}));
       if (response.ok) {
-        setStatus(`✅ かきこみせいこう！ほぞんさき: ${respJson.path || 'ふめい'}`);
-        alert(`direction_sequence[] がこうしんされました: ${respJson.path || TARGET_FILENAME}\nターミナルでPlatformIOコマンドをじっこうしてください。`);
+        setStatus(`✅ かきこみせいこう！}`);
+        alert('とばしてみよう！\n スタッフをよんでください！');
       } else {
         setStatus(`❌ かきこみしっぱい: ${respJson.message || response.statusText}`);
       }
