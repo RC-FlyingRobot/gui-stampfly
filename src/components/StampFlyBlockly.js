@@ -283,20 +283,6 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
         borderLeft: '1px solid #ccc',
         overflow: 'hidden'
       }}>
-        {/* コード表示エリア */}
-        {/* <div style={{ padding: '15px', borderBottom: '1px solid #ddd', flexShrink: 0 }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: '1em' }}>📝 生成された C++ コード</h3>
-          <div style={{ 
-            backgroundColor: '#eee', 
-            padding: '10px', 
-            height: '120px', 
-            overflowY: 'auto', 
-            border: '1px solid #ccc',
-            fontSize: '11px'
-          }}>
-            <pre style={{ margin: 0 }}>{code}</pre>
-          </div>
-        </div> */}
 
         {/* シミュレーターエリア */}
         <div style={{ flex: '1', borderBottom: '1px solid #ddd', overflow: 'auto', minHeight: 0 }}>
