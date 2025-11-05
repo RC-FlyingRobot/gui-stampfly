@@ -131,6 +131,7 @@ defineStampFlyBlocks();
 // --- 3. Reactコンポーネント本体 ---
 import DroneSimulator from './DroneSimulator';
 import LoadingModal from './LoadingModal';
+import styles from './StampFlyBlockly.module.css';
 
 const StampFlyBlockly = () => {
   const blocklyDiv = useRef(null); 
@@ -267,25 +268,18 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
   }, [updateCode]); // updateCodeが変更されたときのみ再実行
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100%' }}>
+    <div className={styles.container}>
       {/* Loading Modal */}
       <LoadingModal isLoading={isLoading} message="書き込み中..." />
       
       {/* 左側: Blocklyワークスペース */}
-      <div ref={blocklyDiv} style={{ flex: '1', minWidth: '400px', border: '1px solid #ddd' }} />
+      <div ref={blocklyDiv} className={styles.blockly} />
       
       {/* 右側: コード、シミュレーター、ボタン */}
-      <div style={{ 
-        flex: '1', 
-        display: 'flex', 
-        flexDirection: 'column',
-        backgroundColor: '#f9f9f9', 
-        borderLeft: '1px solid #ccc',
-        overflow: 'hidden'
-      }}>
+      <div className={styles.rightPanel}>
 
         {/* シミュレーターエリア */}
-        <div style={{ flex: '1', borderBottom: '1px solid #ddd', overflow: 'auto', minHeight: 0 }}>
+        <div className={styles.simulatorArea}>
           <DroneSimulator workspace={workspace.current} />
         </div>
 
@@ -307,7 +301,7 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
           >
             💾 コードをファイルにかきこむ
           </button>
-          <p style={{ marginTop: '8px', fontWeight: 'bold', textAlign: 'center', fontSize: '0.9em', margin: '8px 0 0 0' }}>
+          <p className={styles.statusText}>
             ステータス: {status}
           </p>
         </div>
