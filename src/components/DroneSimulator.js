@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import styles from './DroneSimulator.module.css';
 
 const DroneSimulator = ({ workspace }) => {
+  // グリッドサイズを定義（ここを変えればマップサイズが変わる）
+  const GRID_SIZE = 5;
+  const centerCoord = Math.floor(GRID_SIZE / 2 );
+
   const [droneState, setDroneState] = useState({
-    x: 5, // グリッド中央
-    y: 5,
+    x: centerCoord, // グリッド中央に初期化
+    y: centerCoord + 2, // 手前の位置に初期化
     altitude: 0, // 0=地上, 1=飛行中
-    rotation: 0,
+    rotation: 0 ,
     isFlipping: false,
     isMoving: false,
     currentAction: 'たいきちゅう'
@@ -42,10 +47,10 @@ const DroneSimulator = ({ workspace }) => {
 
     setIsSimulating(true);
     
-    // 初期状態にリセット
+    // 初期状態にリセット（中央に戻す）
     setDroneState({
-      x: 5,
-      y: 5,
+      x: centerCoord,
+      y: centerCoord,
       altitude: 0,
       rotation: 0,
       isFlipping: false,
@@ -84,16 +89,16 @@ const DroneSimulator = ({ workspace }) => {
           newState.currentAction = '⬆️ ぜんしんちゅう';
           break;
         case 'back_1s':
-          newState.y = Math.min(10, prev.y + 1);
-          newState.currentAction = '⬇️ こうたいちゅう';
+          newState.y = Math.min(GRID_SIZE - 1, prev.y + 1);
+          newState.currentAction = '⬇️ 後退中';
           break;
         case 'left_1s':
           newState.x = Math.max(0, prev.x - 1);
           newState.currentAction = '⬅️ ひだりいどうちゅう';
           break;
         case 'right_1s':
-          newState.x = Math.min(10, prev.x + 1);
-          newState.currentAction = '➡️ みぎいどうちゅう';
+          newState.x = Math.min(GRID_SIZE - 1, prev.x + 1);
+          newState.currentAction = '➡️ 右移動中';
           break;
         case 'rotate':
           newState.isFlipping = true;
@@ -117,95 +122,57 @@ const DroneSimulator = ({ workspace }) => {
   };
 
   return (
-    <div style={{ padding: '20px', backgroundColor: '#f0f0f0', borderTop: '2px solid #ccc' }}>
+    <div className={styles.root}>
       <h3>🎮 ドローンシミュレーター</h3>
       
       {/* コントロール */}
-      <div style={{ marginBottom: '15px' }}>
-        <button 
-          onClick={runSimulation} 
-          disabled={isSimulating}
-          style={{ 
-            padding: '10px 20px', 
-            marginRight: '10px',
-            backgroundColor: isSimulating ? '#ccc' : '#2196F3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: isSimulating ? 'not-allowed' : 'pointer'
-          }}
-        >
-          ▶️ シミュレーションかいし
+      <div className={styles.controls}>
+        <button onClick={runSimulation} disabled={isSimulating} className={`${styles.button} ${styles.primary}`}>
+          ▶️ シミュレーション開始
         </button>
-        <button 
-          onClick={stopSimulation}
-          disabled={!isSimulating}
-          style={{ 
-            padding: '10px 20px',
-            backgroundColor: !isSimulating ? '#ccc' : '#f44336',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: !isSimulating ? 'not-allowed' : 'pointer'
-          }}
-        >
-          ⏹️ ていし
+        <button onClick={stopSimulation} disabled={!isSimulating} className={`${styles.button} ${styles.danger}`}>
+          ⏹️ 停止
         </button>
       </div>
 
-      {/* ステータス表示 */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '20px', 
-        marginBottom: '15px',
-        padding: '10px',
-        backgroundColor: 'white',
-        borderRadius: '5px'
-      }}>
-        <div>
-          <strong>いまのうごき:</strong> {droneState.currentAction}
-        </div>
-        <div>
-          <strong>高さ:</strong> {droneState.altitude === 0 ? 'ちじょう 🟤' : 'ひこうちゅう 🟦'}
-        </div>
-      </div>
-
-      {/* グリッド表示 */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(11, 40px)',
-        gridTemplateRows: 'repeat(11, 40px)',
-        gap: '2px',
-        backgroundColor: '#ddd',
-        padding: '5px',
-        borderRadius: '5px'
-      }}>
-        {Array.from({ length: 121 }).map((_, idx) => {
-          const x = idx % 11;
-          const y = Math.floor(idx / 11);
-          const isDrone = x === droneState.x && y === droneState.y;
-          
-          return (
-            <div
-              key={idx}
-              style={{
-                backgroundColor: isDrone 
-                  ? (droneState.altitude === 0 ? '#ff9800' : '#4CAF50')
-                  : 'white',
-                border: '1px solid #ccc',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                transform: isDrone ? `rotate(${droneState.rotation}deg)` : 'none',
-                transition: 'all 0.3s ease',
-                animation: droneState.isFlipping && isDrone ? 'flip 0.5s' : 'none'
-              }}
-            >
-              {isDrone && '🚁'}
+      {/* ステータス表示とグリッドのラッパー（レスポンシブ） */}
+      <div className={styles.statusGridWrapper}>
+        <div className={styles.statusBox}>
+          <div className={styles.statusContent}>
+            <div>
+              <strong>現在の動作:</strong> {droneState.currentAction}
             </div>
-          );
-        })}
+            <div>
+              <strong>高度:</strong> {droneState.altitude === 0 ? '地上 🟤' : '飛行中 🟦'}
+            </div>
+          </div>
+        </div>
+        {/* グリッド表示（中央寄せ） */}
+        <div className={styles.gridContainer}>
+          <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 40px)`, gridTemplateRows: `repeat(${GRID_SIZE}, 40px)` }}>
+            {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, idx) => {
+              const x = idx % GRID_SIZE;
+              const y = Math.floor(idx / GRID_SIZE);
+              const isDrone = x === droneState.x && y === droneState.y;
+
+              return (
+                <div
+                  key={idx}
+                  className={styles.cell}
+                  style={{
+                    backgroundColor: isDrone 
+                      ? (droneState.altitude === 0 ? '#ff9800' : '#4CAF50')
+                      : 'white',
+                    transform: isDrone ? `rotate(${droneState.rotation}deg)` : 'none',
+                    animation: droneState.isFlipping && isDrone ? 'flip 0.5s' : 'none'
+                  }}
+                >
+                  {isDrone && '🚁'}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
