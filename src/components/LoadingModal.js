@@ -3,9 +3,9 @@ import React from 'react';
 /**
  * LoadingModal - A modal overlay with a spinner for showing loading state
  * @param {boolean} isLoading - Controls whether the modal is visible
- * @param {string} message - Optional message to display (default: "書き込み中...")
+ * @param {string} message - Optional message to display (default: "かきこみちゅう...")
  */
-const LoadingModal = ({ isLoading, message = '書き込み中...' }) => {
+const LoadingModal = ({ isLoading, message = 'かきこみちゅう...' }) => {
   if (!isLoading) return null;
 
   return (
