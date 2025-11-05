@@ -4,11 +4,12 @@ import styles from './DroneSimulator.module.css';
 const DroneSimulator = ({ workspace }) => {
   // グリッドサイズを定義（ここを変えればマップサイズが変わる）
   const GRID_SIZE = 5;
+  const START_Y_OFFSET = 2;
   const centerCoord = Math.floor(GRID_SIZE / 2 );
 
   const [droneState, setDroneState] = useState({
     x: centerCoord, // グリッド中央に初期化
-    y: centerCoord + 2, // 手前の位置に初期化
+    y: centerCoord + START_Y_OFFSET, // 手前の位置に初期化
     altitude: 0, // 0=地上, 1=飛行中
     rotation: 0 ,
     isFlipping: false,
@@ -50,7 +51,7 @@ const DroneSimulator = ({ workspace }) => {
     // 初期状態にリセット（中央に戻す）
     setDroneState({
       x: centerCoord,
-      y: centerCoord,
+      y: centerCoord + START_Y_OFFSET,
       altitude: 0,
       rotation: 0,
       isFlipping: false,
