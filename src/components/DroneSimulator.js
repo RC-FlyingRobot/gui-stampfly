@@ -90,7 +90,7 @@ const DroneSimulator = ({ workspace }) => {
           break;
         case 'back_1s':
           newState.y = Math.min(GRID_SIZE - 1, prev.y + 1);
-          newState.currentAction = '⬇️ 後退中';
+          newState.currentAction = '⬇️ こうたいちゅう';
           break;
         case 'left_1s':
           newState.x = Math.max(0, prev.x - 1);
@@ -98,7 +98,7 @@ const DroneSimulator = ({ workspace }) => {
           break;
         case 'right_1s':
           newState.x = Math.min(GRID_SIZE - 1, prev.x + 1);
-          newState.currentAction = '➡️ 右移動中';
+          newState.currentAction = '➡️ みぎいどうちゅう';
           break;
         case 'rotate':
           newState.isFlipping = true;
@@ -140,10 +140,10 @@ const DroneSimulator = ({ workspace }) => {
         <div className={styles.statusBox}>
           <div className={styles.statusContent}>
             <div>
-              <strong>現在の動作:</strong> {droneState.currentAction}
+              <strong>今のどうさ:</strong> {droneState.currentAction}
             </div>
             <div>
-              <strong>高度:</strong> {droneState.altitude === 0 ? '地上 🟤' : '飛行中 🟦'}
+              <strong>たかさ:</strong> {droneState.altitude === 0 ? '地上 🟤' : '飛行中 🟦'}
             </div>
           </div>
         </div>

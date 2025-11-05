@@ -270,7 +270,7 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
   return (
     <div className={styles.container}>
       {/* Loading Modal */}
-      <LoadingModal isLoading={isLoading} message="書き込み中..." />
+      <LoadingModal isLoading={isLoading} message="かきこみちゅう..." />
       
       {/* 左側: Blocklyワークスペース */}
       <div ref={blocklyDiv} className={styles.blockly} />
