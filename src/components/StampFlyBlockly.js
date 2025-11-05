@@ -2,10 +2,27 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as Blockly from 'blockly';
 // 💡 C++ジェネレーターは標準ではないため、別途カスタム実装が必要です。
 // ここでは仮のオブジェクトとして定義し、後ほど中身を実装します。
-const Cpp = new Blockly.Generator('Cpp'); 
+const Cpp = new Blockly.Generator('Cpp');
+
+// --- 定数: 外部への書き込み先とマッピングはコンポーネント外へ ---
+// 書き込み先のデフォルトファイル名（BASE_DIR 以下の相対パス）
+const TARGET_FILENAME = 'M5Stampfly/src/direction_sequence.hpp';
+
+// ブロックタイプから Direction_t 列挙値へのマッピング
+const BLOCK_TO_DIRECTION = {
+  'take_off': '',
+  'land': '',
+  'forward_1s': 'FORWARD',
+  'right_1s': 'RIGHT',
+  'left_1s': 'LEFT',
+  'back_1s': 'BACK',
+  'rotate': 'FLIP',
+};
 
 // --- 1. StampFlyカスタムブロックの定義 ---
 const defineStampFlyBlocks = () => {
+  // すでに定義済みなら再定義を避ける
+  if (Blockly.Blocks['take_off']) return;
   // --- 1-1. ブロックの見た目と動作を定義 ---
   Blockly.Blocks['take_off'] = {
     init: function() {
@@ -84,7 +101,7 @@ const defineStampFlyBlocks = () => {
   };
 
   Cpp['land'] = function() {
-    return '  take_on();\n';
+    return '  land();\n';
   };
 
   Cpp['forward_1s'] = function() {
@@ -121,8 +138,7 @@ const toolboxXml = `
 </xml>
 `;
 
-// ブロック定義は一度だけ実行
-defineStampFlyBlocks();
+// ブロック定義は useEffect 内で一度だけ実行する（モジュールロード時の副作用を避ける）
 
 // --- 3. Reactコンポーネント本体 ---
 import DroneSimulator from './DroneSimulator';
@@ -135,19 +151,7 @@ const StampFlyBlockly = () => {
   const [code, setCode] = useState('');
   const [status, setStatus] = useState('たいきちゅう...');
   const [isLoading, setIsLoading] = useState(false);
-  // 書き込み先のデフォルトファイル名（BASE_DIR 以下の相対パス）
-  const TARGET_FILENAME = 'M5Stampfly/src/direction_sequence.hpp';
-  
-  // ブロックタイプから Direction_t 列挙値へのマッピング
-  const blockToDirection = {
-    'take_off': '',
-    'land': '',
-    'forward_1s': 'FORWARD',
-    'right_1s': 'RIGHT',
-    'left_1s': 'LEFT',
-    'back_1s': 'BACK',
-    'rotate': 'FLIP',
-  };
+  // NOTE: TARGET_FILENAME と BLOCK_TO_DIRECTION はファイル先頭の定数を使用
 
   // ワークスペース変更時にコードを再生成し、ステートを更新するコールバック
   const updateCode = useCallback(() => {
@@ -163,7 +167,7 @@ const StampFlyBlockly = () => {
           
           // ブロックのチェーンを辿って順番に処理
           while (currentBlock) {
-            const direction = blockToDirection[currentBlock.type];
+            const direction = BLOCK_TO_DIRECTION[currentBlock.type];
             if (direction) {
               directionList.push(direction);
             }
@@ -184,7 +188,7 @@ const StampFlyBlockly = () => {
     setStatus('ファイルをかきこみちゅう...');
     try {
       // まず現在のファイルを読み取る
-      const readResponse = await fetch(`/api/read-file?filename=${TARGET_FILENAME}`);
+  const readResponse = await fetch(`/api/read-file?filename=${TARGET_FILENAME}`);
       let fileContent = '';
       
       if (readResponse.ok) {
@@ -222,7 +226,7 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
 
       const respJson = await response.json().catch(() => ({}));
       if (response.ok) {
-        setStatus(`✅ かきこみせいこう！}`);
+        setStatus('✅ かきこみせいこう！');
         alert('とばしてみよう！\n スタッフをよんでください！');
       } else {
         setStatus(`❌ かきこみしっぱい: ${respJson.message || response.statusText}`);
@@ -236,6 +240,8 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
   };
 
   useEffect(() => {
+    // ブロック定義を一度行う（モジュールロード時の副作用を避けるため useEffect 内で）
+    defineStampFlyBlocks();
     // ワークスペースの初期化とリスナーの設定
     if (blocklyDiv.current && !workspace.current) {
       workspace.current = Blockly.inject(blocklyDiv.current, {
