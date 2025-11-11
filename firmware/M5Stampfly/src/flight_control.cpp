@@ -698,17 +698,16 @@ void get_command(void) {
         if (Mode == FLIP_MODE) {
             Pitch_angle_command = 0.0;
             Roll_angle_command  = 0.0;
-        } else {
+        } else { 
+            float saisyo= -0.20;
+            float saigo=0.05;
             switch (direction) {
                 case FORWARD:
-                    if (direction_counter < DIRECTION_GOING_TIME) {
-                        // 加速・巡航フェーズ
-                        Pitch_angle_command = -0.10;
-                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
-                        // 減速フェーズ（逆方向に傾ける）
-                        Pitch_angle_command = 0.05;
+                    if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        // フェーズ（傾ける）
+                        Pitch_angle_command = saisyo+(saigo-saisyo)/(DIRECTION_REVERSING_TIME)*direction_counter;
                     } else if (direction_counter < DIRECTION_END_TIME){
-                        Pitch_angle_command = 0.0;
+                        Pitch_angle_command = saigo+(0-saigo)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
                     } else {
 						Pitch_angle_command = 0.0;
 					}
@@ -997,16 +996,16 @@ void rate_control(void) {
         // Motor Control
         // 正規化Duty
         FrontRight_motor_duty = Duty_fr.update(
-            (Thrust_command + (-Roll_rate_command + Pitch_rate_command + Yaw_rate_command) * 0.20f) / BATTERY_VOLTAGE,
+            (Thrust_command + (-Roll_rate_command + Pitch_rate_command + Yaw_rate_command) * 0.25f) / BATTERY_VOLTAGE,
             Interval_time);
         FrontLeft_motor_duty = Duty_fl.update(
-            (Thrust_command + (Roll_rate_command + Pitch_rate_command - Yaw_rate_command) * 0.20f) / BATTERY_VOLTAGE,
+            (Thrust_command + (Roll_rate_command + Pitch_rate_command - Yaw_rate_command) * 0.25f) / BATTERY_VOLTAGE,
             Interval_time);
         RearRight_motor_duty = Duty_rr.update(
-            (Thrust_command + (-Roll_rate_command - Pitch_rate_command - Yaw_rate_command) * 0.20f) / BATTERY_VOLTAGE,
+            (Thrust_command + (-Roll_rate_command - Pitch_rate_command - Yaw_rate_command) * 0.25f) / BATTERY_VOLTAGE,
             Interval_time);
         RearLeft_motor_duty = Duty_rl.update(
-            (Thrust_command + (Roll_rate_command - Pitch_rate_command + Yaw_rate_command) * 0.40f) / BATTERY_VOLTAGE,
+            (Thrust_command + (Roll_rate_command - Pitch_rate_command + Yaw_rate_command) * 0.25f) / BATTERY_VOLTAGE,
             Interval_time);
 
         const float minimum_duty = 0.0f;
