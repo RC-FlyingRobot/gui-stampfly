@@ -699,58 +699,81 @@ void get_command(void) {
             Pitch_angle_command = 0.0;
             Roll_angle_command  = 0.0;
         } else { 
-            float saisyo= -0.20;
-            float saigo=0.05;
+            float saisyo_p;
+            float saigo_p;
+            float saisyo_r;
+            float saigo_r;
             switch (direction) {
                 case FORWARD:
-                    if (direction_counter < DIRECTION_REVERSING_TIME) {
-                        // フェーズ（傾ける）
-                        Pitch_angle_command = saisyo+(saigo-saisyo)/(DIRECTION_REVERSING_TIME)*direction_counter;
+					saisyo_p = -0.25f;// 前ちょっと強く
+					saigo_p = 0.05f;
+					saisyo_r=0.02f;
+					saigo_r=0.0f;
+                    if (direction_counter < DIRECTION_REVERSING_TIME/4) {
+						Pitch_angle_command = (saisyo_p)/(DIRECTION_REVERSING_TIME/4)*direction_counter;
+					}else if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
                     } else if (direction_counter < DIRECTION_END_TIME){
-                        Pitch_angle_command = saigo+(0-saigo)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
+                        Pitch_angle_command = saigo_p+(0-saigo_p)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
                     } else {
 						Pitch_angle_command = 0.0;
 					}
-                    Roll_angle_command = 0.1f * Stick[AILERON];
+
+					if (direction_counter < DIRECTION_REVERSING_TIME) {
+						Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
+					}
                     break;
 
                 case BACK:
-                    if (direction_counter < DIRECTION_GOING_TIME) {
-                        Pitch_angle_command = 0.10;
-                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
-                        Pitch_angle_command = -0.05;
+					saisyo_p = 0.20f;
+					saigo_p = -0.05f;
+					saisyo_r = 0.05f;
+					saigo_r = 0.0f;
+                    if (direction_counter < DIRECTION_REVERSING_TIME/4) {
+						Pitch_angle_command = (saisyo_p)/(DIRECTION_REVERSING_TIME/4)*direction_counter;
+					} else if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
 					} else if (direction_counter < DIRECTION_END_TIME){
-						Pitch_angle_command = 0.0;
+                        Pitch_angle_command = saigo_p+(0-saigo_p)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
                     } else {
                         Pitch_angle_command = 0.0;
                     }
-                    Roll_angle_command = 0.1f * Stick[AILERON];
+
+					if (direction_counter < DIRECTION_REVERSING_TIME) {
+						Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
+					}
+
                     break;
 
                 case RIGHT:
-                    if (direction_counter < DIRECTION_GOING_TIME) {
-                        Roll_angle_command = 0.10;
-                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
-                        Roll_angle_command = -0.05;
+					saisyo_r = 0.30;//右ちょっと強く
+					saigo_r = -0.05;
+					saisyo_p= -0.06f;
+					saigo_p = -0.02f;
+                    if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
+						Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
 					} else if (direction_counter < DIRECTION_END_TIME){
-						Roll_angle_command = 0.0;
+                        Roll_angle_command = saigo_r+(0-saigo_r)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
                     } else {
                         Roll_angle_command = 0.0;
                     }
-                    Pitch_angle_command = 0.1f * Stick[ELEVATOR];
+                    Pitch_angle_command = 0.0f;
                     break;
 
                 case LEFT:
-                    if (direction_counter < DIRECTION_GOING_TIME) {
-                        Roll_angle_command = -0.10;
-                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
-                        Roll_angle_command = 0.05;
+					saisyo_r = -0.20;
+					saigo_r = 0.05;
+					saisyo_p= -0.06f;
+					saigo_p = -0.02f;
+                    if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
+						Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
 					} else if (direction_counter < DIRECTION_END_TIME){
-						Roll_angle_command = 0.0;
+                        Roll_angle_command = saigo_r+(0-saigo_r)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
                     } else {
                         Roll_angle_command = 0.0;
                     }
-                    Pitch_angle_command = 0.1f * Stick[ELEVATOR];
                     break;
 
                 case NORMAL:
