@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styles from './DroneSimulator.module.css';
 
 const DroneSimulator = ({ workspace }) => {
@@ -21,7 +21,6 @@ const DroneSimulator = ({ workspace }) => {
   });
   
   const [isSimulating, setIsSimulating] = useState(false);
-  const [simulationSpeed, setSimulationSpeed] = useState(1000); // ms per action
 
   // ブロックから動作シーケンスを生成
   const generateActionSequence = () => {

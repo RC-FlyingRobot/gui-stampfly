@@ -55,7 +55,9 @@ export default function ScoreInputModal({ isOpen, onClose, onSubmit }) {
       }
 
       // 成功したらモーダルを閉じる
-      onSubmit && onSubmit(data);
+      if (onSubmit) {
+        onSubmit(data);
+      }
       handleClose();
     } catch (err) {
       setError(err.message);
