@@ -712,7 +712,7 @@ void get_command(void) {
             float saigo_r;
             switch (direction) {
                 case FORWARD:
-					saisyo_p = -0.20f;
+					saisyo_p = -0.10f;
 					saigo_p = 0.00f;
 					saisyo_r=0.00f;
 					saigo_r=0.0f;
@@ -732,8 +732,8 @@ void get_command(void) {
                     break;
 
                 case BACK:
-					saisyo_p = 0.10f;
-					saigo_p = -0.02f;
+					saisyo_p = 0.025f;
+					saigo_p = -0.01f;
 					saisyo_r = 0.00f;
 					saigo_r = 0.0f;
                     if (direction_counter < DIRECTION_REVERSING_TIME/4) {
@@ -753,19 +753,19 @@ void get_command(void) {
                     break;
 
                 case RIGHT:
-                    saisyo_r = 0.10;
-					saigo_r = -0.05;
-					saisyo_p= -0.06f;//-0.06f;
-					saigo_p = -0.02f;//-0.02f;
+                    saisyo_r = 0.066;
+					saigo_r = -0.00;
+					saisyo_p= -0.00f;// 一旦前に傾けない
+					saigo_p = -0.00f;
                     if (direction_counter < DIRECTION_REVERSING_TIME) {
                         Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
 						Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
 					} else if (direction_counter < DIRECTION_END_TIME){
                         Roll_angle_command = saigo_r+(0-saigo_r)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
+                        Pitch_angle_command = saigo_p+(0-saigo_p)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
                     } else {
                         Roll_angle_command = 0.0;
                     }
-                    Pitch_angle_command = 0.0f;
                     break;
 
                 case LEFT:
@@ -778,6 +778,7 @@ void get_command(void) {
 						Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
 					} else if (direction_counter < DIRECTION_END_TIME){
                         Roll_angle_command = saigo_r+(0-saigo_r)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
+                        Pitch_angle_command = saigo_p+(0-saigo_p)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
                     } else {
                         Roll_angle_command = 0.0;
                     }
