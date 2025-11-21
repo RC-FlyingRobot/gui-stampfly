@@ -144,7 +144,7 @@ const DroneSimulator = ({ workspace }) => {
               <strong>今のどうさ:</strong> {droneState.currentAction}
             </div>
             <div>
-              <strong>たかさ:</strong> {droneState.altitude === 0 ? '地上 🟤' : '飛行中 🟦'}
+              <strong>たかさ:</strong> {droneState.altitude === 0 ? 'ちじょう 🟤' : 'ひこうちゅう 🟦'}
             </div>
           </div>
         </div>

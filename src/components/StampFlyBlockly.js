@@ -229,11 +229,15 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
         setStatus('✅ かきこみせいこう！');
         alert('とばしてみよう！\n スタッフをよんでください！');
       } else {
-        setStatus(`❌ かきこみしっぱい: ${respJson.message || response.statusText}`);
+        const errorMsg = `かきこみしっぱい: ${respJson.message || response.statusText}`;
+        setStatus(`❌ ${errorMsg}`);
+        alert(`❌ ${errorMsg}\n\n もういちどためしてください。`);
       }
     } catch (error) {
       console.error('API通信エラー:', error);
-      setStatus('❌ サーバーエラーがはっせいしました。');
+      const errorMsg = 'サーバーエラーがはっせいしました。';
+      setStatus(`❌ ${errorMsg}`);
+      alert(`❌ ${errorMsg}\n\n ネットワークせつぞくをかくにんしてください。`);
     } finally {
       setIsLoading(false);
     }
