@@ -543,7 +543,14 @@ void flip(void) {
         Flip_flag       = 0;
         Ahrs_reset_flag = 0;
         Flip_counter    = 0;
-        Mode            = FLIGHT_MODE;
+        
+        // Check if all sequences are completed after flip
+        if (direction_changed_times >= MAX_STATES_NUM) {
+            direction = NORMAL;
+            Mode      = AUTO_LANDING_MODE;  // 全シーケンス完了なら着陸へ
+        } else {
+            Mode = FLIGHT_MODE;  // まだ続きがあれば飛行継続
+        }
     }
 }
 
@@ -705,9 +712,9 @@ void get_command(void) {
             float saigo_r;
             switch (direction) {
                 case FORWARD:
-					saisyo_p = -0.25f;// 前ちょっと強く
-					saigo_p = 0.05f;
-					saisyo_r=0.02f;
+					saisyo_p = -0.20f;
+					saigo_p = 0.00f;
+					saisyo_r=0.00f;
 					saigo_r=0.0f;
                     if (direction_counter < DIRECTION_REVERSING_TIME/4) {
 						Pitch_angle_command = (saisyo_p)/(DIRECTION_REVERSING_TIME/4)*direction_counter;
@@ -725,9 +732,9 @@ void get_command(void) {
                     break;
 
                 case BACK:
-					saisyo_p = 0.20f;
-					saigo_p = -0.05f;
-					saisyo_r = 0.05f;
+					saisyo_p = 0.10f;
+					saigo_p = -0.02f;
+					saisyo_r = 0.00f;
 					saigo_r = 0.0f;
                     if (direction_counter < DIRECTION_REVERSING_TIME/4) {
 						Pitch_angle_command = (saisyo_p)/(DIRECTION_REVERSING_TIME/4)*direction_counter;
@@ -746,10 +753,10 @@ void get_command(void) {
                     break;
 
                 case RIGHT:
-					saisyo_r = 0.30;//右ちょっと強く
+                    saisyo_r = 0.10;
 					saigo_r = -0.05;
-					saisyo_p= -0.06f;
-					saigo_p = -0.02f;
+					saisyo_p= -0.06f;//-0.06f;
+					saigo_p = -0.02f;//-0.02f;
                     if (direction_counter < DIRECTION_REVERSING_TIME) {
                         Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
 						Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
@@ -762,10 +769,10 @@ void get_command(void) {
                     break;
 
                 case LEFT:
-					saisyo_r = -0.20;
+					saisyo_r = -0.10;
 					saigo_r = 0.05;
-					saisyo_p= -0.06f;
-					saigo_p = -0.02f;
+					saisyo_p= -0.06f;//-0.06f;
+					saigo_p = -0.02f;//-0.02f;
                     if (direction_counter < DIRECTION_REVERSING_TIME) {
                         Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
 						Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
