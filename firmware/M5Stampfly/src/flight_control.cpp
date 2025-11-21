@@ -224,9 +224,9 @@ uint8_t direction_changed_times = 0;
 bool takeoff_completed = false;
 
 
-const uint32_t DIRECTION_GOING_TIME = 700;
-const uint32_t DIRECTION_REVERSING_TIME = 800;
-const uint32_t DIRECTION_END_TIME = 1200;
+const uint32_t DIRECTION_GOING_TIME = 600;
+const uint32_t DIRECTION_REVERSING_TIME = 700;
+const uint32_t DIRECTION_END_TIME = 1100;
 
 // Direction_t direction_sequence[] = {FORWARD, BACK, FORWARD, BACK, FORWARD, BACK};
 
@@ -712,22 +712,20 @@ void get_command(void) {
             float saigo_r;
             switch (direction) {
                 case FORWARD:
-					saisyo_p = -0.10f;
-					saigo_p = 0.00f;
-					saisyo_r=0.00f;
-					saigo_r=0.0f;
-                    if (direction_counter < DIRECTION_REVERSING_TIME/4) {
-						Pitch_angle_command = (saisyo_p)/(DIRECTION_REVERSING_TIME/4)*direction_counter;
-					}else if (direction_counter < DIRECTION_REVERSING_TIME) {
-                        Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
+                    if (direction_counter < DIRECTION_GOING_TIME) {
+                        // 加速・巡航フェーズ
+                        Pitch_angle_command = -0.075f;
+                        Roll_angle_command = 0.030f;
+                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        // 減速フェーズ（逆方向に傾ける）
+                        Pitch_angle_command = 0.0375f;
+                        Roll_angle_command = 0.010f;
                     } else if (direction_counter < DIRECTION_END_TIME){
-                        Pitch_angle_command = saigo_p+(0-saigo_p)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
+                        Pitch_angle_command = 0.0;
+                        Roll_angle_command = 0.0f;
                     } else {
 						Pitch_angle_command = 0.0;
-					}
-
-					if (direction_counter < DIRECTION_REVERSING_TIME) {
-						Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
+						Roll_angle_command = 0.0f;
 					}
                     break;
 
@@ -753,18 +751,18 @@ void get_command(void) {
                     break;
 
                 case RIGHT:
-                    saisyo_r = 0.066;
-					saigo_r = -0.00;
-					saisyo_p= -0.00f;// 一旦前に傾けない
-					saigo_p = -0.00f;
-                    if (direction_counter < DIRECTION_REVERSING_TIME) {
-                        Roll_angle_command = saisyo_r+(saigo_r-saisyo_r)/(DIRECTION_REVERSING_TIME)*direction_counter;
-						Pitch_angle_command = saisyo_p+(saigo_p-saisyo_p)/(DIRECTION_REVERSING_TIME)*direction_counter;
+                    if (direction_counter < DIRECTION_GOING_TIME) {
+                        Roll_angle_command = 0.10;
+                        Pitch_angle_command = -0.06;
+                    } else if (direction_counter < DIRECTION_REVERSING_TIME) {
+                        Roll_angle_command = -0.05;
+                        Pitch_angle_command = 0.02f;
 					} else if (direction_counter < DIRECTION_END_TIME){
-                        Roll_angle_command = saigo_r+(0-saigo_r)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
-                        Pitch_angle_command = saigo_p+(0-saigo_p)/(DIRECTION_END_TIME-DIRECTION_REVERSING_TIME)*(direction_counter-DIRECTION_REVERSING_TIME);
+						Roll_angle_command = 0.0;
+                        Pitch_angle_command = 0.0;
                     } else {
                         Roll_angle_command = 0.0;
+                        Pitch_angle_command = 0.0;
                     }
                     break;
 
