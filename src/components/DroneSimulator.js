@@ -3,14 +3,16 @@ import styles from './DroneSimulator.module.css';
 
 const DroneSimulator = ({ workspace }) => {
   // グリッドサイズを定義（ここを変えればマップサイズが変わる）
-  const GRID_SIZE = 6;
-  const START_Y_OFFSET = 2;
-  const START_X_OFFSET = -3;
-  const centerCoord = Math.floor(GRID_SIZE / 2 );
+  const GRID_WIDTH = 4;  // 横幅
+  const GRID_HEIGHT = 3; // 縦幅
+  const START_Y_OFFSET = 1;
+  const START_X_OFFSET = -2;
+  const centerX = Math.floor(GRID_WIDTH / 2);
+  const centerY = Math.floor(GRID_HEIGHT / 2);
 
   const [droneState, setDroneState] = useState({
-    x: centerCoord + START_X_OFFSET, // グリッド中央に初期化
-    y: centerCoord + START_Y_OFFSET, // 手前の位置に初期化
+    x: centerX + START_X_OFFSET, // グリッド中央に初期化
+    y: centerY + START_Y_OFFSET, // 手前の位置に初期化
     altitude: 0, // 0=地上, 1=飛行中
     rotation: 0 ,
     isFlipping: false,
@@ -51,8 +53,8 @@ const DroneSimulator = ({ workspace }) => {
     
     // 初期状態にリセット（中央に戻す）
     setDroneState({
-      x: centerCoord + START_X_OFFSET,
-      y: centerCoord + START_Y_OFFSET,
+      x: centerX + START_X_OFFSET,
+      y: centerY + START_Y_OFFSET,
       altitude: 0,
       rotation: 0,
       isFlipping: false,
@@ -91,7 +93,7 @@ const DroneSimulator = ({ workspace }) => {
           newState.currentAction = '⬆️ ぜんしんちゅう';
           break;
         case 'back_1s':
-          newState.y = Math.min(GRID_SIZE - 1, prev.y + 1);
+          newState.y = Math.min(GRID_HEIGHT - 1, prev.y + 1);
           newState.currentAction = '⬇️ こうたいちゅう';
           break;
         case 'left_1s':
@@ -99,7 +101,7 @@ const DroneSimulator = ({ workspace }) => {
           newState.currentAction = '⬅️ ひだりいどうちゅう';
           break;
         case 'right_1s':
-          newState.x = Math.min(GRID_SIZE - 1, prev.x + 1);
+          newState.x = Math.min(GRID_WIDTH - 1, prev.x + 1);
           newState.currentAction = '➡️ みぎいどうちゅう';
           break;
         case 'rotate':
@@ -151,10 +153,10 @@ const DroneSimulator = ({ workspace }) => {
         </div>
         {/* グリッド表示（中央寄せ） */}
         <div className={styles.gridContainer}>
-          <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${GRID_SIZE}, 40px)`, gridTemplateRows: `repeat(${GRID_SIZE}, 40px)` }}>
-            {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, idx) => {
-              const x = idx % GRID_SIZE;
-              const y = Math.floor(idx / GRID_SIZE);
+          <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${GRID_WIDTH}, 40px)`, gridTemplateRows: `repeat(${GRID_HEIGHT}, 40px)` }}>
+            {Array.from({ length: GRID_WIDTH * GRID_HEIGHT }).map((_, idx) => {
+              const x = idx % GRID_WIDTH;
+              const y = Math.floor(idx / GRID_WIDTH);
               const isDrone = x === droneState.x && y === droneState.y;
 
               return (
