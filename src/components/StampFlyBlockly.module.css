@@ -31,6 +31,7 @@
   .rightPanel {
     flex: 0 0 auto;
     height: auto;
+    min-height: 0;
   }
 }
 
@@ -95,6 +96,13 @@
     opacity: 0;
     overflow: hidden;
     border: none;
+    padding: 0;
+  }
+
+  .simulatorArea:not(.hidden) {
+    flex: 0 0 auto;
+    height: auto;
+    max-height: 50vh; /* 画面の半分まで */
   }
   
   .blockly {
