@@ -143,6 +143,7 @@ const toolboxXml = `
 // --- 3. Reactコンポーネント本体 ---
 import DroneSimulator from './DroneSimulator';
 import LoadingModal from './LoadingModal';
+import ScoreInputModal from './ScoreInputModal';
 import styles from './StampFlyBlockly.module.css';
 
 const StampFlyBlockly = () => {
@@ -153,6 +154,10 @@ const StampFlyBlockly = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isScoreModalOpen, setIsScoreModalOpen] = useState(false);
+  const [isRankingOpen, setIsRankingOpen] = useState(false);
+  const [rankings, setRankings] = useState([]);
+  const [isLoadingRanking, setIsLoadingRanking] = useState(false);
   // NOTE: TARGET_FILENAME と BLOCK_TO_DIRECTION はファイル先頭の定数を使用
 
   // ワークスペース変更時にコードを再生成し、ステートを更新するコールバック
@@ -183,6 +188,30 @@ const StampFlyBlockly = () => {
         setCode(fullCode);
     }
   }, []);
+
+  // ランキングを取得する関数
+  const fetchRankings = async () => {
+    setIsLoadingRanking(true);
+    try {
+      const response = await fetch('/api/rankings?limit=50');
+      const data = await response.json();
+      if (response.ok) {
+        setRankings(data.rankings);
+      }
+    } catch (error) {
+      console.error('ランキング取得エラー:', error);
+    } finally {
+      setIsLoadingRanking(false);
+    }
+  };
+
+  // ランキングボタンをクリックしたときの処理
+  const handleRankingToggle = () => {
+    if (!isRankingOpen) {
+      fetchRankings();
+    }
+    setIsRankingOpen(!isRankingOpen);
+  };
 
   // APIルートにコードを送信し、direction_sequence[] の行だけを書き換える処理
   const writeCodeToFile = async () => {
@@ -230,6 +259,10 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
       if (response.ok) {
         setStatus('✅ かきこみせいこう！');
         alert('とばしてみよう！\n スタッフをよんでください！');
+        // 書き込み成功後にスコア入力モーダルを開く
+        setIsScoreModalOpen(true);
+        // ランキングを閉じる
+        setIsRankingOpen(false);
       } else {
         const errorMsg = `かきこみしっぱい: ${respJson.message || response.statusText}`;
         setStatus(`❌ ${errorMsg}`);
@@ -293,6 +326,78 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
     <div className={styles.container}>
       {/* Loading Modal */}
       <LoadingModal isLoading={isLoading} message="かきこみちゅう..." />
+      
+      {/* Score Input Modal */}
+      <ScoreInputModal 
+        isOpen={isScoreModalOpen}
+        onClose={() => setIsScoreModalOpen(false)}
+        onSubmit={(data) => {
+          console.log('Score saved:', data);
+          setStatus('✅ スコアをほぞんしました！');
+          // スコア保存後にランキングを更新
+          if (isRankingOpen) {
+            fetchRankings();
+          }
+        }}
+      />
+      
+      {/* 右上ランキングボタン */}
+      <div className={styles.rankingContainer}>
+        <button 
+          className={styles.rankingButton}
+          onClick={handleRankingToggle}
+        >
+          🏆 ランキング
+        </button>
+        
+        {/* ランキングドロップダウン */}
+        {isRankingOpen && (
+          <div className={styles.rankingDropdown}>
+            <div className={styles.rankingHeader}>
+              <h3>🏆 ランキング</h3>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setIsRankingOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            
+            {isLoadingRanking ? (
+              <div className={styles.rankingLoading}>
+                <div className={styles.spinner}></div>
+                <p>読み込み中...</p>
+              </div>
+            ) : rankings.length === 0 ? (
+              <div className={styles.rankingEmpty}>
+                <p>まだランキングデータがありません</p>
+              </div>
+            ) : (
+              <div className={styles.rankingList}>
+                {rankings.map((entry, index) => (
+                  <div
+                    key={entry.id}
+                    className={`${styles.rankingItem} ${
+                      index === 0 ? styles.first :
+                      index === 1 ? styles.second :
+                      index === 2 ? styles.third : ''
+                    }`}
+                  >
+                    <div className={styles.rank}>
+                      {index === 0 ? '🥇' :
+                       index === 1 ? '🥈' :
+                       index === 2 ? '🥉' :
+                       `${index + 1}`}
+                    </div>
+                    <div className={styles.username}>{entry.username}</div>
+                    <div className={styles.score}>{entry.score}点</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       
       {/* 左側: Blocklyワークスペース */}
       <div ref={blocklyDiv} className={styles.blockly} />

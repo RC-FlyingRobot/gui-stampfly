@@ -101,3 +101,236 @@
     min-width: 200px;
   }
 }
+
+/* ランキングボタンとドロップダウン */
+.rankingContainer {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.rankingButton {
+  padding: 12px 24px;
+  font-size: 1em;
+  background-color: #FFD700;
+  color: #333;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rankingButton:hover {
+  background-color: #FFC700;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.rankingButton:active {
+  transform: translateY(0);
+}
+
+.rankingDropdown {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  width: 400px;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rankingHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: white;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.rankingHeader h3 {
+  margin: 0;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 1.3em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.rankingList {
+  padding: 12px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.rankingItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.rankingItem:hover {
+  background-color: #f0f0f0;
+  transform: translateX(4px);
+}
+
+.rankingItem.first {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: white;
+  border-color: #FFD700;
+  font-weight: bold;
+}
+
+.rankingItem.second {
+  background: linear-gradient(135deg, #C0C0C0 0%, #A8A8A8 100%);
+  color: white;
+  border-color: #C0C0C0;
+  font-weight: bold;
+}
+
+.rankingItem.third {
+  background: linear-gradient(135deg, #CD7F32 0%, #B87333 100%);
+  color: white;
+  border-color: #CD7F32;
+  font-weight: bold;
+}
+
+.rank {
+  font-size: 1.2em;
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+}
+
+.username {
+  flex: 1;
+  font-size: 1em;
+  margin: 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score {
+  font-size: 1.1em;
+  font-weight: bold;
+  min-width: 60px;
+  text-align: right;
+}
+
+.rankingLoading {
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #FFD700;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.rankingEmpty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #999;
+}
+
+.rankingEmpty p {
+  margin: 0;
+  font-size: 1em;
+}
+
+@media screen and (max-width: 800px) {
+  .rankingContainer {
+    top: 10px;
+    right: 10px;
+  }
+  
+  .rankingButton {
+    padding: 10px 18px;
+    font-size: 0.9em;
+  }
+  
+  .rankingDropdown {
+    width: calc(100vw - 40px);
+    max-width: 400px;
+  }
+  
+  .rankingHeader h3 {
+    font-size: 1.1em;
+  }
+  
+  .rankingItem {
+    padding: 10px 12px;
+  }
+  
+  .rank {
+    font-size: 1em;
+    min-width: 35px;
+  }
+  
+  .username {
+    font-size: 0.95em;
+  }
+  
+  .score {
+    font-size: 1em;
+    min-width: 55px;
+  }
+}
