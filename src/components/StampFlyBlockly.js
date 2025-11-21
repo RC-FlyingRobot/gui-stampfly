@@ -151,6 +151,8 @@ const StampFlyBlockly = () => {
   const [code, setCode] = useState('');
   const [status, setStatus] = useState('たいきちゅう...');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   // NOTE: TARGET_FILENAME と BLOCK_TO_DIRECTION はファイル先頭の定数を使用
 
   // ワークスペース変更時にコードを再生成し、ステートを更新するコールバック
@@ -243,6 +245,20 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
     }
   };
 
+  // ウィンドウサイズ監視でモバイル判定
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 800);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+
   useEffect(() => {
     // ブロック定義を一度行う（モジュールロード時の副作用を避けるため useEffect 内で）
     defineStampFlyBlocks();
@@ -283,9 +299,18 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
       
       {/* 右側: コード、シミュレーター、ボタン */}
       <div className={styles.rightPanel}>
+        {/* モバイル時のみトグルボタンを表示 */}
+        {isMobile && (
+          <button 
+            onClick={() => setIsSimulatorOpen(!isSimulatorOpen)}
+            className={styles.toggleButton}
+          >
+            {isSimulatorOpen ? '🎮 シミュレータを非表示' : '🎮 シミュレータを表示'}
+          </button>
+        )}
 
         {/* シミュレーターエリア */}
-        <div className={styles.simulatorArea}>
+        <div className={`${styles.simulatorArea} ${isMobile && !isSimulatorOpen ? styles.hidden : ''}`}>
           <DroneSimulator workspace={workspace.current} />
         </div>
 

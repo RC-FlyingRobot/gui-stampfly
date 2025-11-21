@@ -27,11 +27,19 @@
   overflow: hidden;
 }
 
+@media screen and (max-width: 800px) {
+  .rightPanel {
+    flex: 0 0 auto;
+    height: auto;
+  }
+}
+
 .simulatorArea {
   flex: 1;
   border-bottom: 1px solid #ddd;
   overflow: auto;
   min-height: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
 }
 
 .writeArea {
@@ -57,4 +65,39 @@
   text-align: center;
   font-size: 0.9em;
   margin: 8px 0 0 0;
+}
+
+.toggleButton {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.9em;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.toggleButton:hover {
+  background-color: #1976D2;
+}
+
+.toggleButton:active {
+  background-color: #0D47A1;
+}
+
+@media screen and (max-width: 800px) {
+  .simulatorArea.hidden {
+    max-height: 0;
+    min-height: 0;
+    flex: 0;
+    opacity: 0;
+    overflow: hidden;
+    border: none;
+  }
+  
+  .blockly {
+    min-width: 200px;
+  }
 }
