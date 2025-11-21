@@ -158,6 +158,7 @@ const StampFlyBlockly = () => {
   const [isRankingOpen, setIsRankingOpen] = useState(false);
   const [rankings, setRankings] = useState([]);
   const [isLoadingRanking, setIsLoadingRanking] = useState(false);
+  const [workspaceReady, setWorkspaceReady] = useState(false);
   // NOTE: TARGET_FILENAME と BLOCK_TO_DIRECTION はファイル先頭の定数を使用
 
   // ワークスペース変更時にコードを再生成し、ステートを更新するコールバック
@@ -308,6 +309,9 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
       
       // 初期状態のコードを生成
       updateCode();
+      
+      // ワークスペース初期化完了を通知
+      setWorkspaceReady(true);
     }
 
     // クリーンアップ
@@ -318,6 +322,7 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
             // ワークスペースを破棄
             workspace.current.dispose();
             workspace.current = null;
+            setWorkspaceReady(false);
         }
     };
   }, [updateCode]); // updateCodeが変更されたときのみ再実行
@@ -416,31 +421,33 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
 
         {/* シミュレーターエリア */}
         <div className={`${styles.simulatorArea} ${isMobile && !isSimulatorOpen ? styles.hidden : ''}`}>
-          <DroneSimulator workspace={workspace.current} />
+          {workspaceReady && <DroneSimulator workspace={workspace.current} />}
         </div>
 
-        {/* 書き込みボタンエリア */}
-        <div style={{ padding: '15px', flexShrink: 0 }}>
-          <button 
-            onClick={writeCodeToFile} 
-            style={{ 
-              width: '100%',
-              padding: '12px', 
-              fontSize: '1em', 
-              backgroundColor: '#4CAF50', 
-              color: 'white', 
-              border: 'none', 
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 'bold'
-            }}
-          >
-            💾 コードをファイルにかきこむ
-          </button>
-          <p className={styles.statusText}>
-            ステータス: {status}
-          </p>
-        </div>
+        {/* 書き込みボタンエリア（PC版のみ表示） */}
+        {!isMobile && (
+          <div style={{ padding: '15px', flexShrink: 0 }}>
+            <button 
+              onClick={writeCodeToFile} 
+              style={{ 
+                width: '100%',
+                padding: '12px', 
+                fontSize: '1em', 
+                backgroundColor: '#4CAF50', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 'bold'
+              }}
+            >
+              💾 コードをファイルにかきこむ
+            </button>
+            <p className={styles.statusText}>
+              ステータス: {status}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

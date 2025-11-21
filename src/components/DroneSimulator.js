@@ -7,6 +7,7 @@ const DroneSimulator = ({ workspace }) => {
   const GRID_HEIGHT = 3; // 縦幅
   const START_Y_OFFSET = 1;
   const START_X_OFFSET = -2;
+  const SIMULATION_SPEED = 1000; // ミリ秒
   const centerX = Math.floor(GRID_WIDTH / 2);
   const centerY = Math.floor(GRID_HEIGHT / 2);
 
@@ -66,7 +67,7 @@ const DroneSimulator = ({ workspace }) => {
     // 各アクションを順次実行
     for (const action of actions) {
       await executeAction(action);
-      await new Promise(resolve => setTimeout(resolve, simulationSpeed));
+      await new Promise(resolve => setTimeout(resolve, SIMULATION_SPEED));
     }
 
     setDroneState(prev => ({ ...prev, currentAction: 'かんりょう！', isMoving: false }));
@@ -123,6 +124,18 @@ const DroneSimulator = ({ workspace }) => {
     setIsSimulating(false);
     setDroneState(prev => ({ ...prev, currentAction: 'ていし', isMoving: false }));
   };
+
+  // workspaceが未初期化の場合はローディング表示
+  if (!workspace) {
+    return (
+      <div className={styles.root}>
+        <h3>🎮 ドローンシミュレーター</h3>
+        <div style={{ padding: '20px', color: '#666' }}>
+          よみこみちゅう...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.root}>

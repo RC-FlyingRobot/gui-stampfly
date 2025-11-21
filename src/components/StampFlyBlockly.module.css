@@ -25,6 +25,7 @@
   background-color: #f9f9f9;
   border-left: 1px solid #ccc;
   overflow: hidden;
+  min-height: 0px;
 }
 
 @media screen and (max-width: 800px) {
@@ -39,8 +40,10 @@
   flex: 1;
   border-bottom: 1px solid #ddd;
   overflow: auto;
-  min-height: 0;
+  min-height: 1px;
   transition: max-height 0.3s ease, opacity 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .writeArea {
@@ -102,7 +105,7 @@
   .simulatorArea:not(.hidden) {
     flex: 0 0 auto;
     height: auto;
-    max-height: 50vh; /* 画面の半分まで */
+    max-height: 60vh; /* 書き込みボタンがない分、少し高く */
   }
   
   .blockly {
