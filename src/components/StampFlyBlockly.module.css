@@ -113,12 +113,41 @@
   }
 }
 
-/* ランキングボタンとドロップダウン */
-.rankingContainer {
+/* トップボタングループ（スコア表とランキング） */
+.topButtonsContainer {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 1000;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.scoreGuideButton {
+  padding: 12px 24px;
+  font-size: 1em;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scoreGuideButton:hover {
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.scoreGuideButton:active {
+  transform: translateY(0);
 }
 
 .rankingButton {
@@ -147,6 +176,50 @@
   transform: translateY(0);
 }
 
+/* スコアガイドドロップダウン */
+.scoreGuideDropdown {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  width: 400px;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+  animation: slideDown 0.3s ease;
+}
+
+.scoreGuideHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.scoreGuideHeader h3 {
+  margin: 0;
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+.scoreGuideContent {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.scoreGuideContent > div {
+  border-top: none;
+  background-color: white;
+}
+
+/* ランキングドロップダウン */
 .rankingDropdown {
   position: absolute;
   top: 60px;
@@ -308,14 +381,31 @@
 }
 
 @media screen and (max-width: 800px) {
-  .rankingContainer {
+  .topButtonsContainer {
     top: 10px;
     right: 10px;
+    flex-direction: row;
+    gap: 8px;
+  }
+  
+  .scoreGuideButton {
+    padding: 10px 18px;
+    font-size: 0.9em;
   }
   
   .rankingButton {
     padding: 10px 18px;
     font-size: 0.9em;
+  }
+  
+  .scoreGuideDropdown {
+    width: calc(100vw - 40px);
+    max-width: 400px;
+    right: 0;
+  }
+  
+  .scoreGuideHeader h3 {
+    font-size: 1.1em;
   }
   
   .rankingDropdown {

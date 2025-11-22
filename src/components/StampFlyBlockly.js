@@ -144,6 +144,7 @@ const toolboxXml = `
 import DroneSimulator from './DroneSimulator';
 import LoadingModal from './LoadingModal';
 import ScoreInputModal from './ScoreInputModal';
+import ScoreGuide from './ScoreGuide';
 import styles from './StampFlyBlockly.module.css';
 
 const StampFlyBlockly = () => {
@@ -159,6 +160,7 @@ const StampFlyBlockly = () => {
   const [rankings, setRankings] = useState([]);
   const [isLoadingRanking, setIsLoadingRanking] = useState(false);
   const [workspaceReady, setWorkspaceReady] = useState(false);
+  const [isScoreGuideOpen, setIsScoreGuideOpen] = useState(false);
   // NOTE: TARGET_FILENAME と BLOCK_TO_DIRECTION はファイル先頭の定数を使用
 
   // ワークスペース変更時にコードを再生成し、ステートを更新するコールバック
@@ -346,14 +348,40 @@ uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[
         }}
       />
       
-      {/* 右上ランキングボタン */}
-      <div className={styles.rankingContainer}>
+      {/* 右上ボタングループ（スコア表とランキング） */}
+      <div className={styles.topButtonsContainer}>
+        {isMobile && (
+          <button 
+            className={styles.scoreGuideButton}
+            onClick={() => setIsScoreGuideOpen(!isScoreGuideOpen)}
+          >
+            📊 とくてんひょう
+          </button>
+        )}
         <button 
           className={styles.rankingButton}
           onClick={handleRankingToggle}
         >
           🏆 ランキング
         </button>
+        
+        {/* スコアガイドドロップダウン（モバイル時のみ） */}
+        {isMobile && isScoreGuideOpen && (
+          <div className={styles.scoreGuideDropdown}>
+            <div className={styles.scoreGuideHeader}>
+              <h3>📊 とくてんひょう</h3>
+              <button 
+                className={styles.closeButton}
+                onClick={() => setIsScoreGuideOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.scoreGuideContent}>
+              <ScoreGuide />
+            </div>
+          </div>
+        )}
         
         {/* ランキングドロップダウン */}
         {isRankingOpen && (

@@ -9,6 +9,6 @@ typedef enum {
     FLIP,
 } Direction_t;
 
-Direction_t direction_sequence[] = {FORWARD,FLIP};
+Direction_t direction_sequence[] = {RIGHT, RIGHT, FORWARD, RIGHT, FORWARD};
 
 uint8_t MAX_STATES_NUM = sizeof(direction_sequence) / sizeof(direction_sequence[0]);

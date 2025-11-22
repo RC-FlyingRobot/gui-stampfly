@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './DroneSimulator.module.css';
+import ScoreGuide from './ScoreGuide';
 
 const DroneSimulator = ({ workspace }) => {
   // グリッドサイズを定義（ここを変えればマップサイズが変わる）
@@ -190,6 +191,9 @@ const DroneSimulator = ({ workspace }) => {
           </div>
         </div>
       </div>
+
+      {/* 得点表 */}
+      <ScoreGuide />
 
       <style jsx>{`
         @keyframes flip {
