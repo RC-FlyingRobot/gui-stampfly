@@ -224,9 +224,9 @@ uint8_t direction_changed_times = 0;
 bool takeoff_completed = false;
 
 
-const uint32_t DIRECTION_GOING_TIME = 600;
-const uint32_t DIRECTION_REVERSING_TIME = 700;
-const uint32_t DIRECTION_END_TIME = 1100;
+const uint32_t DIRECTION_GOING_TIME = 1200;
+const uint32_t DIRECTION_REVERSING_TIME = 1400;
+const uint32_t DIRECTION_END_TIME = 2200;
 
 // Direction_t direction_sequence[] = {FORWARD, BACK, FORWARD, BACK, FORWARD, BACK};
 
@@ -356,7 +356,11 @@ void loop_400Hz(void) {
         Control_period = Interval_time;
 
         // Judge Mode change
-        if (judge_mode_change() == 1) Mode = AUTO_LANDING_MODE;
+        if (judge_mode_change() == 1) {
+            direction = direction_sequence[direction_changed_times + 1];
+            direction_counter = 0;
+            direction_changed_times++;
+        }
         if (rc_isconnected() == 0) Mode = AUTO_LANDING_MODE;
         // if (Range0flag == 20) Mode = AUTO_LANDING_MODE;
         if (OverG_flag == 1) Mode = PARKING_MODE;
@@ -714,7 +718,7 @@ void get_command(void) {
                 case FORWARD:
                     if (direction_counter < DIRECTION_GOING_TIME) {
                         // 加速・巡航フェーズ
-                        Pitch_angle_command = -0.06f;//-0.075f
+                        Pitch_angle_command = -0.1f;//-0.075f
                         Roll_angle_command = 0.030f;
                     } else if (direction_counter < DIRECTION_REVERSING_TIME) {
                         // 減速フェーズ（逆方向に傾ける）
