@@ -224,9 +224,9 @@ uint8_t direction_changed_times = 0;
 bool takeoff_completed = false;
 
 
-const uint32_t DIRECTION_GOING_TIME = 1200;
-const uint32_t DIRECTION_REVERSING_TIME = 1400;
-const uint32_t DIRECTION_END_TIME = 2200;
+const uint32_t DIRECTION_GOING_TIME = 10000;
+const uint32_t DIRECTION_REVERSING_TIME = 12000;
+const uint32_t DIRECTION_END_TIME = 12400;
 
 // Direction_t direction_sequence[] = {FORWARD, BACK, FORWARD, BACK, FORWARD, BACK};
 
@@ -251,6 +251,7 @@ uint8_t auto_landing(void);
 float get_trim_duty(float voltage);
 void flip(void);
 float get_rate_ref(float x);
+uint8_t judge_direction_change(void);
 
 // 割り込み関数
 // Intrupt function
@@ -356,11 +357,19 @@ void loop_400Hz(void) {
         Control_period = Interval_time;
 
         // Judge Mode change
-        if (judge_mode_change() == 1) {
-            direction = direction_sequence[direction_changed_times + 1];
-            direction_counter = 0;
-            direction_changed_times++;
-        }
+        //if (judge_mode_change() == 1) Mode = AUTO_LANDING_MODE;
+		if (judge_direction_change() == 1) {
+			direction_counter = 0;
+			if (direction_changed_times < MAX_STATES_NUM - 1) {
+				direction_changed_times++;
+				direction = direction_sequence[direction_changed_times];
+				buzzer_sound(4000, 100);  // 確認音
+				if (direction == FLIP)
+					Mode = FLIP_MODE;
+			} else {
+				Mode = AUTO_LANDING_MODE;
+			}
+		}
         if (rc_isconnected() == 0) Mode = AUTO_LANDING_MODE;
         // if (Range0flag == 20) Mode = AUTO_LANDING_MODE;
         if (OverG_flag == 1) Mode = PARKING_MODE;
@@ -462,9 +471,9 @@ void flip(void) {
         Flip_flag = 1;
         // Roll_rate_reference = 0.0f;
         if (Voltage > 3.8)
-            Thrust_command = T_flip + 0.17 * BATTERY_VOLTAGE;
+            Thrust_command = T_flip + 0.30 * BATTERY_VOLTAGE;//0.17
         else
-            Thrust_command = T_flip + 0.15 * BATTERY_VOLTAGE;
+            Thrust_command = T_flip + 0.25 * BATTERY_VOLTAGE;//0.15
         // Angle Control
         Roll_angle_command  = 0.0;
         Pitch_angle_command = 0.0;
@@ -549,6 +558,7 @@ void flip(void) {
         Flip_counter    = 0;
         
         // Check if all sequences are completed after flip
+		direction_changed_times++;
         if (direction_changed_times >= MAX_STATES_NUM) {
             direction = NORMAL;
             Mode      = AUTO_LANDING_MODE;  // 全シーケンス完了なら着陸へ
@@ -556,6 +566,27 @@ void flip(void) {
             Mode = FLIGHT_MODE;  // まだ続きがあれば飛行継続
         }
     }
+}
+
+uint8_t judge_direction_change(void) {
+    // 方向切り替えボタンが押されて離されたかを確認
+    uint8_t state;
+    static uint8_t chatter = 0;
+    state                  = 0;
+    if (chatter == 0) {
+        if (get_arming_button() == 1) {
+            chatter = 1;
+        }
+    } else {
+        if (get_arming_button() == 0) {
+            chatter++;
+            if (chatter > 2) {  // 10 -> 2 に短縮（5ms）
+                chatter = 0;
+                state   = 1;
+            }
+        }
+    }
+    return state;
 }
 
 uint8_t judge_mode_change(void) {
@@ -570,7 +601,7 @@ uint8_t judge_mode_change(void) {
     } else {
         if (get_arming_button() == 0) {
             chatter++;
-            if (chatter > 40) {
+            if (chatter > 5) {  // 40 -> 5 に短縮（12.5ms）
                 chatter = 0;
                 state   = 1;
             }
@@ -718,8 +749,8 @@ void get_command(void) {
                 case FORWARD:
                     if (direction_counter < DIRECTION_GOING_TIME) {
                         // 加速・巡航フェーズ
-                        Pitch_angle_command = -0.1f;//-0.075f
-                        Roll_angle_command = 0.030f;
+                        Pitch_angle_command = -0.060f;//-0.075f
+                        Roll_angle_command = -0.0f;
                     } else if (direction_counter < DIRECTION_REVERSING_TIME) {
                         // 減速フェーズ（逆方向に傾ける）
                         Pitch_angle_command = 0.0375f;
@@ -756,8 +787,8 @@ void get_command(void) {
 
                 case RIGHT:
                     if (direction_counter < DIRECTION_GOING_TIME) {
-                        Roll_angle_command = 0.10;
-                        Pitch_angle_command = -0.04;
+                        Roll_angle_command = 0.050f;
+                        Pitch_angle_command = -0.0;
                     } else if (direction_counter < DIRECTION_REVERSING_TIME) {
                         Roll_angle_command = -0.05;
                         Pitch_angle_command = 0.02f;
@@ -801,25 +832,26 @@ void get_command(void) {
 
         if (direction != NORMAL && Mode != FLIP_MODE) {
             direction_counter++;
-            if (direction_counter > DIRECTION_END_TIME) {
-                direction_counter = 0;
-                direction_changed_times++;
-                if (direction_changed_times >= MAX_STATES_NUM) {
-                    direction = NORMAL;
-                    Mode      = AUTO_LANDING_MODE;
-                } else {
-                    direction = direction_sequence[direction_changed_times];
-                    if (direction == FLIP) {
-                        Mode = FLIP_MODE;
-                        direction_changed_times++;
-                        if (direction_changed_times < MAX_STATES_NUM) {
-                            direction = direction_sequence[direction_changed_times];
-                        } else {
-                            direction = NORMAL;
-                        }
-                    }
-                }
-            }
+            // ボタン押下でのみ方向切り替えを行うため、自動進行は無効化
+            // if (direction_counter > DIRECTION_END_TIME) {
+            //     direction_counter = 0;
+            //     direction_changed_times++;
+            //     if (direction_changed_times >= MAX_STATES_NUM) {
+            //         direction = NORMAL;
+            //         Mode      = AUTO_LANDING_MODE;
+            //     } else {
+            //         direction = direction_sequence[direction_changed_times];
+            //         if (direction == FLIP) {
+            //             Mode = FLIP_MODE;
+            //             direction_changed_times++;
+            //             if (direction_changed_times < MAX_STATES_NUM) {
+            //                 direction = direction_sequence[direction_changed_times];
+            //             } else {
+            //                 direction = NORMAL;
+            //             }
+            //         }
+            //     }
+            // }
         }
     } else if (Control_mode == RATECONTROL) {
         Roll_rate_reference  = get_rate_ref(Stick[AILERON]);
@@ -942,11 +974,11 @@ uint8_t auto_landing(void) {
     }
     if (old_alt[9] >= Altitude2)  // もし降下しなかったら、スロットル更に下げる
     {
-        Thrust0 = Thrust0 * 0.9999;
+        Thrust0 = Thrust0 * 0.998;  // 0.9999 -> 0.998 (より速く減少)
     }
     if (Altitude2 < 0.15)  // 地面効果で降りなかった場合対策
     {
-        Thrust0 = Thrust0 * 0.999;
+        Thrust0 = Thrust0 * 0.995;  // 0.999 -> 0.995 (より速く減少)
     }
     if (Altitude2 < 0.1) {
         flag          = 1;
@@ -1019,7 +1051,7 @@ void rate_control(void) {
             if (Thrust_command / BATTERY_VOLTAGE > Thrust0 * 1.15f) Thrust_command = BATTERY_VOLTAGE * Thrust0 * 1.15f;
             if (Thrust_command / BATTERY_VOLTAGE < Thrust0 * 0.85f) Thrust_command = BATTERY_VOLTAGE * Thrust0 * 0.85f;
         } else if (Mode == AUTO_LANDING_MODE) {
-            z_dot_err      = -0.15 - Alt_velocity;
+            z_dot_err      = -0.35 - Alt_velocity;  // -0.15 -> -0.35 に変更（降下速度を2倍以上に）
             Thrust_command = Thrust_filtered.update(
                 (Thrust0 + z_dot_pid.update(z_dot_err, Interval_time)) * BATTERY_VOLTAGE, Interval_time);
             // if (Thrust_command/BATTERY_VOLTAGE > Thrust0*1.1f ) Thrust_command = BATTERY_VOLTAGE*Thrust0*1.1f;
@@ -1195,14 +1227,14 @@ uint8_t get_arming_button(void) {
     static uint8_t state = 0;
     if ((int)Stick[BUTTON_ARM] == 1) {
         chatta++;
-        if (chatta > 10) {
-            chatta = 10;
+        if (chatta > 3) {  // 10 -> 3 に短縮
+            chatta = 3;
             state  = 1;
         }
     } else {
         chatta--;
-        if (chatta < -10) {
-            chatta = -10;
+        if (chatta < -3) {  // -10 -> -3 に短縮
+            chatta = -3;
             state  = 0;
         }
     }
