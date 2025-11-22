@@ -378,25 +378,21 @@ static void screen_running_btn_1_event_handler(lv_event_t *e) {
     switch (code) {
         case LV_EVENT_CLICKED: {
             // fly
+            
+            // 常にボタン押下を送信（シーケンス制御用）
+            auto_up_down_status = 1;
+            beep();
 
             if (AltMode == ALT_CONTROL_MODE && fly_mode == PARKING_MODE && !fly_status) {
-                fly_status          = 1;
-                auto_up_down_status = 1;
-                beep();
+                fly_status = 1;
             }
             if (AltMode == ALT_CONTROL_MODE && fly_mode == FLIGHT_MODE && fly_status) {
-                fly_status          = 0;
-                auto_up_down_status = 1;
-                beep();
+                fly_status = 0;
             }
             if (AltMode == NOT_ALT_CONTROL_MODE && !fly_status_manual) {
-                fly_status_manual   = 1;
-                auto_up_down_status = 1;
-                beep();
+                fly_status_manual = 1;
             } else if (AltMode == NOT_ALT_CONTROL_MODE && fly_status_manual) {
-                fly_status_manual   = 0;
-                auto_up_down_status = 1;
-                beep();
+                fly_status_manual = 0;
             }
             break;
         }

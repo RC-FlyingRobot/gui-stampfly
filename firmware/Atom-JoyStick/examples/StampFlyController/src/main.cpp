@@ -623,7 +623,7 @@ void loop() {
     }
     if (auto_up_down_status) {
         auto_up_down_status_counter++;
-        if (auto_up_down_status_counter > 20) {
+        if (auto_up_down_status_counter > 200) {  // 20 -> 200 (2秒に延長)
             auto_up_down_status_counter = 0;
             auto_up_down_status         = 0;
         }
