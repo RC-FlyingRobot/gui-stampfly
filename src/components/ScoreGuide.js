@@ -9,6 +9,7 @@ export default function ScoreGuide() {
     { icon: '⚪', label: 'しろエリア', points: 40 },
     { icon: '🔄', label: 'フリップ', points: 10 },
     { icon: '🚪', label: 'くぐる', points: 10 },
+    { icon: '🌊', label: 'ブルーシート', points: 5 },
   ];
 
   return (
