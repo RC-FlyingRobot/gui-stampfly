@@ -448,7 +448,7 @@ void flip(void) {
     Flip_time            = 0.4;
     Pitch_rate_reference = 0.0;
     domega               = 0.00217f * 8.0 * PI / Flip_time / Flip_time;  // 25->22->23->225->222->221->220
-    flip_delay           = 180;
+    flip_delay           = 270;//180
     flip_step            = (uint16_t)(Flip_time / 0.0025f);
     T_flip               = get_trim_duty(Voltage) * BATTERY_VOLTAGE;
 
@@ -714,7 +714,7 @@ void get_command(void) {
                 case FORWARD:
                     if (direction_counter < DIRECTION_GOING_TIME) {
                         // 加速・巡航フェーズ
-                        Pitch_angle_command = -0.075f;
+                        Pitch_angle_command = -0.06f;//-0.075f
                         Roll_angle_command = 0.030f;
                     } else if (direction_counter < DIRECTION_REVERSING_TIME) {
                         // 減速フェーズ（逆方向に傾ける）
@@ -730,7 +730,7 @@ void get_command(void) {
                     break;
 
                 case BACK:
-					saisyo_p = 0.025f;
+					saisyo_p = 0.025f;//0.025f;
 					saigo_p = -0.01f;
 					saisyo_r = 0.00f;
 					saigo_r = 0.0f;
@@ -753,7 +753,7 @@ void get_command(void) {
                 case RIGHT:
                     if (direction_counter < DIRECTION_GOING_TIME) {
                         Roll_angle_command = 0.10;
-                        Pitch_angle_command = -0.06;
+                        Pitch_angle_command = -0.04;
                     } else if (direction_counter < DIRECTION_REVERSING_TIME) {
                         Roll_angle_command = -0.05;
                         Pitch_angle_command = 0.02f;
