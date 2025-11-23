@@ -208,7 +208,7 @@ uint8_t Alt_flag       = 0;
 float Z_dot_ref = 0.0f;
 
 // 高度目標
-const float Alt_ref0   = 1.0f;
+const float Alt_ref0   = 0.5f;
 volatile float Alt_ref = Alt_ref0;
 
 uint8_t ahrs_reset_flag      = 0;
@@ -461,7 +461,7 @@ void flip(void) {
     Flip_time            = 0.4;
     Pitch_rate_reference = 0.0;
     domega               = 0.00217f * 8.0 * PI / Flip_time / Flip_time;  // 25->22->23->225->222->221->220
-    flip_delay           = 270;//180
+    flip_delay           = 180;//180
     flip_step            = (uint16_t)(Flip_time / 0.0025f);
     T_flip               = get_trim_duty(Voltage) * BATTERY_VOLTAGE;
 
@@ -471,9 +471,9 @@ void flip(void) {
         Flip_flag = 1;
         // Roll_rate_reference = 0.0f;
         if (Voltage > 3.8)
-            Thrust_command = T_flip + 0.30 * BATTERY_VOLTAGE;//0.17
+            Thrust_command = T_flip + 0.17 * BATTERY_VOLTAGE;//0.17
         else
-            Thrust_command = T_flip + 0.25 * BATTERY_VOLTAGE;//0.15
+            Thrust_command = T_flip + 0.15 * BATTERY_VOLTAGE;//0.15
         // Angle Control
         Roll_angle_command  = 0.0;
         Pitch_angle_command = 0.0;
@@ -1051,7 +1051,7 @@ void rate_control(void) {
             if (Thrust_command / BATTERY_VOLTAGE > Thrust0 * 1.15f) Thrust_command = BATTERY_VOLTAGE * Thrust0 * 1.15f;
             if (Thrust_command / BATTERY_VOLTAGE < Thrust0 * 0.85f) Thrust_command = BATTERY_VOLTAGE * Thrust0 * 0.85f;
         } else if (Mode == AUTO_LANDING_MODE) {
-            z_dot_err      = -0.35 - Alt_velocity;  // -0.15 -> -0.35 に変更（降下速度を2倍以上に）
+            z_dot_err      = -0.15 - Alt_velocity;  // -0.15 -> -0.35 に変更（降下速度を2倍以上に）
             Thrust_command = Thrust_filtered.update(
                 (Thrust0 + z_dot_pid.update(z_dot_err, Interval_time)) * BATTERY_VOLTAGE, Interval_time);
             // if (Thrust_command/BATTERY_VOLTAGE > Thrust0*1.1f ) Thrust_command = BATTERY_VOLTAGE*Thrust0*1.1f;
@@ -1265,3 +1265,4 @@ void motor_stop(void) {
     set_duty_rr(0.0);
     set_duty_rl(0.0);
 }
+
